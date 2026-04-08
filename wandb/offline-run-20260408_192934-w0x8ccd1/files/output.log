@@ -1,0 +1,24 @@
+
+  Step 1: 自身の疲労度: 0.30, 新規タスク: 独居患者の退院後見守り（管轄外）, 患者health: 0.55, SDHリスク: 0.70, 孤…
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/yasuhiro/Downloads/DAI-CICS/src/wandb_eval.py", line 424, in <module>
+    main()
+  File "/Users/yasuhiro/Downloads/DAI-CICS/src/wandb_eval.py", line 397, in main
+    evaluator.run_evaluation_loop(states)
+  File "/Users/yasuhiro/Downloads/DAI-CICS/src/wandb_eval.py", line 237, in run_evaluation_loop
+    action = self.get_agent_action(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/Downloads/DAI-CICS/src/wandb_eval.py", line 195, in get_agent_action
+    action = _call_llm(
+             ^^^^^^^^^^
+  File "/Users/yasuhiro/Downloads/DAI-CICS/src/wandb_eval.py", line 125, in _call_llm
+    return call_bedrock(system, user, max_tokens=max_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/Downloads/DAI-CICS/src/llm_agents.py", line 68, in call_bedrock
+    token = _get_bearer_token()
+            ^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/Downloads/DAI-CICS/src/llm_agents.py", line 49, in _get_bearer_token
+    raise EnvironmentError(
+OSError: AWS_BEARER_TOKEN_BEDROCK environment variable is not set. Export it before running: export AWS_BEARER_TOKEN_BEDROCK=bedrock-api-key-...
