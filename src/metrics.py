@@ -89,6 +89,9 @@ def compute_daily_metrics(model: "CareNetworkModel", day: int) -> dict[str, Any]
     # M1: prevention was executed
     m1 = int(prevention_today > 0)
     # M2: medical↔care info sharing (proxy: coordination_level > 0.55 AND discharge completed today)
+    # Scenario A: coord is capped at coordination_level_init + 0.20 = 0.50 < 0.55 → M2 rarely fires
+    # Scenario B/C: coord starts at 0.50 and N1/successful coordination can push it above 0.55 → M2 fires
+    # This correctly differentiates fragmented (A) from community-supported (B/C) networks.
     discharge_completed_today = sum(
         1 for t in model.completed_tasks
         if t.kind == "discharge" and t.completed_day == day

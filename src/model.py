@@ -52,7 +52,10 @@ class CareNetworkModel(Model):
         self.rng_py = self.random  # alias for agents
 
         self.current_day: int = 0
-        self.coordination_level: float = C.COORDINATION_LEVEL_INIT
+        # Use scenario-specific coordination_level_init as BOTH initial value and
+        # mean-reversion target.  Scenario A starts low (0.30) to model fragmented
+        # networks; B/C start at 0.50 (normal community care network).
+        self.coordination_level: float = scenario_cfg.coordination_level_init
 
         # Task management
         self._next_task_id: int = 0
@@ -214,9 +217,14 @@ class CareNetworkModel(Model):
         cfg = self.scenario_cfg
         use_n3 = cfg.ai_active and cfg.nudge_n3_enabled and not cfg.nudge_only_l1
 
-        available = [w for w in self.workers if w.available]
+        # Build the pool once; do NOT remove workers after a single task —
+        # instead rely on w.available (which checks tasks_done_today < capacity_per_day).
+        # This allows workers with capacity_per_day > 1 to handle multiple tasks.
         if use_n3:
-            available.sort(key=lambda w: w.fatigue)
+            # N3: sort by fatigue ascending so least-loaded workers get tasks first
+            all_workers = sorted(self.workers, key=lambda w: w.fatigue)
+        else:
+            all_workers = list(self.workers)
 
         still_pending: list[Task] = []
         for task in self.pending_tasks:
@@ -224,16 +232,18 @@ class CareNetworkModel(Model):
             if elder is None:
                 continue
 
+            # In B/C with altruism, prefer high-altruism workers; in A, no preference
             if cfg.altruism_cooperation_prob_scale > 0:
-                workers_sorted = sorted(available, key=lambda w: -w.altruism)
+                workers_sorted = sorted(all_workers, key=lambda w: -w.altruism)
             else:
-                workers_sorted = list(available)
+                workers_sorted = list(all_workers)
 
             assigned = False
             for w in workers_sorted:
                 if not w.available:
                     continue
                 if task.kind == "discharge":
+                    # Low coordination → discharge tasks more likely to stall (Scenario A)
                     if self.rng_py.random() > self.coordination_level:
                         continue
                 accepted = w.do_task()
@@ -244,10 +254,12 @@ class CareNetworkModel(Model):
                     if task.kind == "prevention":
                         elder.apply_prevention_care()
                     elif task.kind == "discharge":
-                        self.coordination_level = min(1.0, self.coordination_level + 0.02)
+                        # Coordination boost is capped at init + 0.20 so fragmented
+                        # networks (A: init=0.30, cap=0.50) cannot accumulate to 1.0
+                        # from high task volume alone.
+                        cap = self.scenario_cfg.coordination_level_init + 0.20
+                        self.coordination_level = min(cap, self.coordination_level + 0.02)
                     assigned = True
-                    if w in available:
-                        available.remove(w)
                     break
 
             if not assigned:
@@ -260,28 +272,49 @@ class CareNetworkModel(Model):
     # ----------------------------------------------------------
 
     def _community_cooperation(self, day: int) -> None:
+        """
+        B/C: each willing worker picks the highest-risk Elder who has NOT yet
+        received altruistic care today.  This avoids all workers piling onto the
+        single top-risk elder and instead distributes voluntary care across the
+        most vulnerable group.
+        """
         cfg = self.scenario_cfg
         if cfg.altruism_cooperation_prob_scale == 0:
             return
+
+        # Sort elders by combined risk score descending
         elders_sorted = sorted(
             self.elders, key=lambda e: e.sdh_risk + e.isolation, reverse=True
         )
+        # Track which elders have already received altruistic care this day
+        helped_ids: set[int] = set()
+
         for w in self.workers:
             if not w.available:
                 continue
-            if self.rng_py.random() < w.altruism * cfg.altruism_cooperation_prob_scale * 0.5:
-                target = elders_sorted[0] if elders_sorted else None
-                if target:
-                    ok = w.do_altruistic_task()
-                    if ok:
-                        target.apply_prevention_care()
+            if self.rng_py.random() >= w.altruism * cfg.altruism_cooperation_prob_scale * 0.5:
+                continue
+            # Pick the highest-risk elder not yet helped today
+            target = next(
+                (e for e in elders_sorted if e.unique_id not in helped_ids),
+                None,
+            )
+            if target is None:
+                break
+            ok = w.do_altruistic_task()
+            if ok:
+                target.apply_prevention_care()
+                helped_ids.add(target.unique_id)
 
     # ----------------------------------------------------------
     # Coordination update
     # ----------------------------------------------------------
 
     def _update_coordination(self) -> None:
-        self.coordination_level += (C.COORDINATION_LEVEL_INIT - self.coordination_level) * 0.02
+        # Mean-revert toward the scenario-specific coordination level.
+        # Scenario A reverts to 0.30 (fragmented); B/C revert to 0.50 (community).
+        target = self.scenario_cfg.coordination_level_init
+        self.coordination_level += (target - self.coordination_level) * 0.02
         for m in self.managers:
             self.coordination_level = min(1.0, self.coordination_level + m.coordination_boost * 0.01)
             m.coordination_boost = max(0.0, m.coordination_boost - 0.1)

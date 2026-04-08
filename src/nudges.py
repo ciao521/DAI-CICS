@@ -144,7 +144,15 @@ def nudge_n4(ai: "AIWatcher", model: "CareNetworkModel", level: int) -> bool:
 def apply_nudges(ai: "AIWatcher", model: "CareNetworkModel") -> None:
     """
     Called each day by AIWatcher.step() when ai_active=True.
-    Evaluates current failure conditions and applies the minimal nudge.
+    Implements Dynamic Reflection (AgentDynEx): evaluates FC states and early-warning
+    signals, then applies the SINGLE minimal-level nudge addressing the most urgent issue.
+
+    Priority order (highest urgency first):
+      1. Load concentration / imminent burnout         → N3 (L2/L3)
+      2. Stale discharge tasks (actual FC-A2 trigger)  → N1 (L1/L2)
+      3. High-SDH × high-isolation elders unconnected  → N2 (L3)
+      4. Burnout occurred / general fatigue high        → N4 (L1)
+      5. No critical condition                         → no action
     """
     cfg = model.scenario_cfg
     day = model.current_day
@@ -155,33 +163,39 @@ def apply_nudges(ai: "AIWatcher", model: "CareNetworkModel") -> None:
         return
     last = log[-1]
 
-    # ── Early-warning & FC priority logic ─────────────────────
-    # Priority order: acute chain > discharge stale > load > burnout > social isolation
+    # Pre-compute worker fatigue stats
+    fatigues = [w.fatigue for w in model.workers]
+    if not fatigues:
+        return
+    at_risk_burnout = sum(1 for f in fatigues if f > C.BURNOUT_THRESHOLD * 0.85)
+    burnout_count = sum(1 for w in model.workers if w.burnout)
+    mean_fatigue = float(np.mean(fatigues))
 
-    # 1) Discharge stale (FC-A2) or coordination low → N1
+    # ── Priority 1: Load concentration (FC-B1 early warning) or imminent burnout → N3
+    # Triggers when top-10% load ratio approaches threshold (80% of threshold)
+    # OR when 2+ workers are within 15% of burnout threshold
+    if not cfg.nudge_only_l1:
+        top10_ratio = last.get("top10_load_ratio", 0)
+        if (top10_ratio >= C.FC_B1_LOAD_TOP10_THRESHOLD * 0.8) or (at_risk_burnout >= 2):
+            level = 3 if at_risk_burnout >= 3 else 2
+            _apply_with_min_level(ai, model, "N3", level)
+            return
+
+    # ── Priority 2: Stale discharge tasks (FC-A2 actual trigger only) → N1
+    # Fire N1 only when there are ACTUAL stale tasks, not just because coordination is low.
+    # This prevents N1 from crowding out N2/N3 every day.
     stale_tasks = sum(
         1 for t in model.pending_tasks
         if t.kind == "discharge" and (day - t.created_day) >= C.FC_A2_DISCHARGE_DELAY_DAYS - 1
     )
-    if stale_tasks > 0 or model.coordination_level < 0.45:
-        _apply_with_min_level(ai, model, "N1", 1)
+    if stale_tasks > 0:
+        level = 2 if stale_tasks >= 3 else 1
+        _apply_with_min_level(ai, model, "N1", level)
         return
 
-    # 2) Load concentration (FC-B1) or upcoming burnout → N3
-    fatigues = [w.fatigue for w in model.workers]
-    if fatigues:
-        top_k = max(1, len(fatigues) // 10)
-        top_load = sorted(fatigues, reverse=True)[:top_k]
-        at_risk_burnout = sum(1 for f in fatigues if f > 0.75)
-
-        if last.get("top10_load_ratio", 0) >= C.FC_B1_LOAD_TOP10_THRESHOLD * 0.8 or at_risk_burnout >= 2:
-            level = 2 if not cfg.nudge_only_l1 else 1
-            _apply_with_min_level(ai, model, "N3", level)
-            return
-
-    # 3) High isolation + high SDH elders unconnected → N2 (L3)
+    # ── Priority 3: High-SDH × high-isolation elders unconnected → N2 (L3)
     elders = model.elders
-    if elders:
+    if elders and not cfg.nudge_only_l1:
         sdh_vals = [e.sdh_risk for e in elders]
         iso_vals = [e.isolation for e in elders]
         sdh_thresh = float(np.percentile(sdh_vals, 75))
@@ -192,18 +206,22 @@ def apply_nudges(ai: "AIWatcher", model: "CareNetworkModel") -> None:
             and e.isolation >= iso_thresh
             and not e.received_social_link_today
         ]
-        if len(high_risk_unconnected) >= 2 and not cfg.nudge_only_l1:
+        if len(high_risk_unconnected) >= 2:
             _apply_with_min_level(ai, model, "N2", 3)
             return
 
-    # 4) Burnout or high fatigue → N4 (Manager alert, L1)
-    burnout_count = sum(1 for w in model.workers if w.burnout)
-    mean_fatigue = float(np.mean(fatigues)) if fatigues else 0.0
-    if burnout_count >= 1 or mean_fatigue > 0.60:
+    # ── Priority 4: Burnout occurred or sustained high fatigue → N4 (L1, low cost)
+    if burnout_count >= 1 or mean_fatigue > 0.70:
         _apply_with_min_level(ai, model, "N4", 1)
         return
 
-    # 5) No critical issue: do nothing
+    # ── No critical issue: apply N1 at L1 as a gentle daily coordination reminder
+    # (only if coordination level is well below the scenario-specific target)
+    coord_target = model.scenario_cfg.coordination_level_init
+    if model.coordination_level < coord_target * 0.70:
+        _apply_with_min_level(ai, model, "N1", 1)
+
+    # 5) Otherwise: do nothing
 
 
 def _apply_with_min_level(

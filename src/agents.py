@@ -173,11 +173,18 @@ class WorkerAgent(Agent):
             if self.fatigue >= C.BURNOUT_THRESHOLD:
                 self._check_burnout()
         else:
+            # Burnout recovery: starts after mandatory 7-day rest period.
+            # Recovery rate is 3× normal to model clinical return-to-work support.
+            # Re-entry condition: fatigue must drop to BURNOUT_THRESHOLD - 0.15
+            # (hysteresis buffer prevents immediate re-burnout on return).
             if self.burnout_day is not None:
-                if self.model.current_day - self.burnout_day >= 7:
-                    self.fatigue = _clip(self.fatigue - 0.05)
-                    if self.fatigue < C.BURNOUT_THRESHOLD - 0.05:
+                days_since_burnout = self.model.current_day - self.burnout_day
+                if days_since_burnout >= 7:
+                    recovery = C.FATIGUE_RECOVERY_PER_DAY * 3.0
+                    self.fatigue = _clip(self.fatigue - recovery)
+                    if self.fatigue < C.BURNOUT_THRESHOLD - 0.15:
                         self.burnout = False
+                        self.burnout_day = None
 
 
 # ──────────────────────────────────────────────────────────────

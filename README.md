@@ -501,6 +501,9 @@ wandb sync wandb/offline-run-*/
 | 8 | `wandb_eval --scenario A --steps 5` | LLM Judge評価 |
 | 9 | `wandb sync wandb/offline-run-*/` | オフラインランを同期 |
 
+```
+python -m src.run_experiment --scenario all --days 100 --seeds 5 --plot 2>&1 | tail -35
+```
 ---
 
 ## Environment Setup

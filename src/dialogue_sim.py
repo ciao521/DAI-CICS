@@ -1,12 +1,16 @@
 """
 dialogue_sim.py – Multi-turn discharge coordination conference simulation.
 
-5-turn narrative (prompts loaded from prompts/1-*.py … 5-*.py):
-  Turn 1  Doctor      → opens conference, proposes ideal care plan         (prompts/1-doctor.py)
-  Turn 2  CareManager → pushback, Fatigue=0.88, condition-based refusal    (prompts/2-care_manager.py)
-  Turn 3  Doctor      → presses with bed-turnover pressure                 (prompts/3-doctor.py)
-  Turn 4  PlannerAI   → N3 nudge: load-balancing + incentive ← milestone  (prompts/4-planner_ai.py)
-  Turn 5  CareManager → conditional acceptance after nudge  ← D1 achieved  (prompts/5-care_manager.py)
+5-turn narrative (prompts loaded from prompts/doctor_1.py … prompts/care_manager_5.py):
+  Turn 1  Doctor      → opens conference, proposes ideal care plan         (prompts/doctor_1.py)
+  Turn 2  CareManager → pushback, Fatigue=0.88, condition-based refusal    (prompts/care_manager_2.py)
+  Turn 3  Doctor      → presses with bed-turnover pressure                 (prompts/doctor_3.py)
+  Turn 4  PlannerAI   → N3 nudge: load-balancing + incentive ← milestone  (prompts/planner_ai_4.py)
+  Turn 5  CareManager → conditional acceptance after nudge  ← D1 achieved  (prompts/care_manager_5.py)
+
+ABM context (Day 45, Scenario C, seed=0):
+  cm_fatigue=0.88, gini_fatigue=0.45, cum_acute_events=420, mean_isolation=0.81
+  These values are derived from the ABM simulation to ground the dialogue in quantitative data.
 
 System instruction for Turn 1 user message:
   「システムからの指示」カンファレンスが開始されました。
@@ -398,8 +402,8 @@ def save_dialogue_log(log: list[dict], tag: str = "") -> Path:
         "generated_at": datetime.utcnow().isoformat() + "Z",
         "total_turns": len(log),
         "prompt_files": [
-            "prompts/1-doctor.py", "prompts/2-care_manager.py", "prompts/3-doctor.py",
-            "prompts/4-planner_ai.py", "prompts/5-care_manager.py",
+            "prompts/doctor_1.py", "prompts/care_manager_2.py", "prompts/doctor_3.py",
+            "prompts/planner_ai_4.py", "prompts/care_manager_5.py",
         ],
         "fc_triggered": [
             {"turn": t["turn"], "fc": t["fc_triggered"]}

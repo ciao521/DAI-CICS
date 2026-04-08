@@ -103,8 +103,12 @@ class ScenarioConfig:
     # Scenario A flags
     community_fire_prob: float = 0.0      # A=0, B/C>0
     provider_avoidance_prob: float = 0.60 # A: high avoidance
-    prevention_task_prob: float = 0.02    # A: near-zero prevention
+    prevention_task_prob: float = 0.0     # A: zero prevention (spec: M1=0 continues)
     link_worker_active: bool = False       # A: inactive
+    # Coordination level: scenario-specific initial value AND mean-reversion target.
+    # A: low (0.30) → discharge tasks stall easily (FC-A2)
+    # B/C: normal (0.50) → discharge adjustable with some probability
+    coordination_level_init: float = 0.50
 
     # Scenario B additions
     altruism_cooperation_prob_scale: float = 0.0  # B/C: use altruism to cooperate
@@ -155,7 +159,12 @@ def get_scenario_config(scenario: str, days: int = DEFAULT_DAYS, seed: int = 0,
             scenario="A",
             community_fire_prob=0.0,
             provider_avoidance_prob=0.65,
-            prevention_task_prob=0.02,
+            # prevention_task_prob=0.0: spec says "予防/生活支援タスクはAではほぼ発生しない"
+            # (M1=0が続く). Setting to exactly 0.0 ensures M1 never fires in A.
+            prevention_task_prob=0.0,
+            # coordination_level_init=0.30: A has fragmented coordination.
+            # Discharge tasks stall because workers skip them at ~70% rate.
+            coordination_level_init=0.30,
             link_worker_active=False,
             altruism_cooperation_prob_scale=0.0,
             exploitation_factor=0.0,
@@ -169,6 +178,7 @@ def get_scenario_config(scenario: str, days: int = DEFAULT_DAYS, seed: int = 0,
             community_fire_prob=0.30,
             provider_avoidance_prob=0.20,
             prevention_task_prob=0.25,
+            coordination_level_init=0.50,
             link_worker_active=True,
             altruism_cooperation_prob_scale=1.0,
             exploitation_factor=0.04,   # extra fatigue on high-altruism agents
@@ -182,6 +192,7 @@ def get_scenario_config(scenario: str, days: int = DEFAULT_DAYS, seed: int = 0,
             community_fire_prob=0.30,
             provider_avoidance_prob=0.20,
             prevention_task_prob=0.25,
+            coordination_level_init=0.50,
             link_worker_active=True,
             altruism_cooperation_prob_scale=1.0,
             exploitation_factor=0.02,   # partially mitigated by AI
