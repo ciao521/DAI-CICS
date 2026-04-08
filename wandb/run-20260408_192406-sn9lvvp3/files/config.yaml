@@ -1,0 +1,36 @@
+wandb_version: 1
+
+scenario:
+  desc: null
+  value: A
+days:
+  desc: null
+  value: 100
+seeds:
+  desc: null
+  value: 3
+type:
+  desc: null
+  value: ABM_timeseries
+_wandb:
+  desc: null
+  value:
+    python_version: 3.11.3
+    cli_version: 0.17.0
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1775643846
+    t:
+      1:
+      - 55
+      - 97
+      - 105
+      3:
+      - 13
+      - 16
+      - 23
+      4: 3.11.3
+      5: 0.17.0
+      8:
+      - 5
+      13: darwin-arm64

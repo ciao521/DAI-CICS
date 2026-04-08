@@ -1,0 +1,20 @@
+# DAI-CICS environment variables
+# Copy to .env or export before running
+
+# AWS Bedrock bearer token (used by src/llm_agents.py and src/dialogue_sim.py)
+AWS_BEARER_TOKEN_BEDROCK=
+
+# Weights & Biases API key (project: healthcare-collaboration-sim, entity: yshr-i)
+# Note: original template had typo WANDB_API_KEYWANDB_API_KEY → corrected below
+WANDB_API_KEY=3bdcca6402894797eb1d
+
+# Anthropic direct API key (optional; falls back to Bedrock if not set)
+# Used by src/wandb_eval.py for agent actions + Judge evaluation
+ANTHROPIC_API_KEY=
+
+# Optional overrides
+# ANTHROPIC_API_MODEL=claude-3-opus-20240229   # default model for Anthropic SDK path
+# BEDROCK_MODEL_ID=us.anthropic.claude-opus-4-6-v1
+# AWS_BEDROCK_REGION=us-east-1
+# BEDROCK_MAX_TOKENS=1024
+# BEDROCK_TEMPERATURE=0.7
