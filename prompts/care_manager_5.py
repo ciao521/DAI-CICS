@@ -8,7 +8,7 @@ Template variables (filled at call time):
   {altruism}  float 0.0–1.0  使命感・利他心
 """
 
-CARE_MANAGER_SYSTEM_PROMPT ="""\
+CARE_MANAGER_SYSTEM_PROMPT2 ="""\
 あなたは「適応的医療・介護ネットワークシミュレーション」における、熟練ケアマネジャー（Care Manager）のエージェントです。
 現在、多職種連携会議（退院調整カンファレンス）の最終局面に参加しています。
 

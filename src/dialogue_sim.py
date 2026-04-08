@@ -78,18 +78,18 @@ def _format_prompt(template: str, **kwargs) -> str:
 # Load numbered prompts at module import time
 # ──────────────────────────────────────────────────────────────
 
-_t1 = _load_prompt_module("1-doctor.py")       # DOCTOR_SYSTEM_PROMPT (opening)
-_t2 = _load_prompt_module("2-care_manager.py") # CARE_MANAGER_SYSTEM_PROMPT (pushback)
-_t3 = _load_prompt_module("3-doctor.py")       # DOCTOR_SYSTEM_PROMPT (pressure)
-_t4 = _load_prompt_module("4-planner_ai.py")   # PLANNER_SYSTEM_PROMPT (N3 nudge)
-_t5 = _load_prompt_module("5-care_manager.py") # CARE_MANAGER_SYSTEM_PROMPT (acceptance)
+_t1 = _load_prompt_module("doctor_1.py")       # DOCTOR_SYSTEM_PROMPT (opening)
+_t2 = _load_prompt_module("care_manager_2.py") # CARE_MANAGER_SYSTEM_PROMPT (pushback)
+_t3 = _load_prompt_module("doctor_3.py")       # DOCTOR_SYSTEM_PROMPT (pressure)
+_t4 = _load_prompt_module("planner_ai_4.py")   # PLANNER_SYSTEM_PROMPT (N3 nudge)
+_t5 = _load_prompt_module("care_manager_5.py") # CARE_MANAGER_SYSTEM_PROMPT2 (acceptance)
 
 TURN_PROMPTS = {
     1: (_t1, "DOCTOR_SYSTEM_PROMPT"),
     2: (_t2, "CARE_MANAGER_SYSTEM_PROMPT"),
-    3: (_t3, "DOCTOR_SYSTEM_PROMPT"),
+    3: (_t3, "DOCTOR_SYSTEM_PROMPT2"),
     4: (_t4, "PLANNER_SYSTEM_PROMPT"),
-    5: (_t5, "CARE_MANAGER_SYSTEM_PROMPT"),
+    5: (_t5, "CARE_MANAGER_SYSTEM_PROMPT2"),
 }
 
 

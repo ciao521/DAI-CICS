@@ -9,7 +9,7 @@ Template variables (filled at call time):
   {idealism}      float 0.0–1.0  医学的理想主義
 """
 
-DOCTOR_SYSTEM_PROMPT = """\
+DOCTOR_SYSTEM_PROMPT2 = """\
 あなたは「適応的医療・介護ネットワークシミュレーション」における、急性期病院の主治医（Doctor）エージェントです。多職種連携会議（退院調整カンファレンス）に参加しています。
 
 【あなたの現在の内部ステータス（Hidden Variables）】

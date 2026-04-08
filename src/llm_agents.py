@@ -193,10 +193,11 @@ class AgentState:
 # ──────────────────────────────────────────────────────────────
 # Prompts (imported from prompts/ for easy editing)
 # ──────────────────────────────────────────────────────────────
-from prompts.care_manager import CARE_MANAGER_SYSTEM_PROMPT  # noqa: E402
-from prompts.doctor import DOCTOR_SYSTEM_PROMPT              # noqa: E402
-from prompts.planner_ai import PLANNER_SYSTEM_PROMPT         # noqa: E402
-
+from prompts.doctor_1 import DOCTOR_SYSTEM_PROMPT
+from prompts.care_manager_2 import CARE_MANAGER_SYSTEM_PROMPT
+from prompts.doctor_3 import DOCTOR_SYSTEM_PROMPT2
+from prompts.planner_ai_4 import PLANNER_SYSTEM_PROMPT
+from prompts.care_manager_5 import CARE_MANAGER_SYSTEM_PROMPT2
 # ──────────────────────────────────────────────────────────────
 # Care Manager Agent
 # ──────────────────────────────────────────────────────────────

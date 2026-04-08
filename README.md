@@ -323,8 +323,6 @@ cp env-templete.txt .env
 #   WANDB_API_KEY=wandb_v1_...
 #   ANTHROPIC_API_KEY=sk-ant-...  ← 任意（なければ Bedrock 経由）
 
-python -m src.run_experiment --scenario all --days 100 --seeds 10 --plot
-
 ```
 
 ---
@@ -367,6 +365,7 @@ results/summary_d100_s3.csv
 
 ```bash
 # A/B/C を 10 seed で実行してプロット生成
+python -m src.run_experiment --scenario all --days 100 --seeds 10 --plot
 python -m src.run_experiment --scenario all --days 100 --seeds 10 --plot
 ```
 
