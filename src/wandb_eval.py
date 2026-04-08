@@ -24,7 +24,15 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
 from typing import Any
+
+# ── Load .env from project root (safe: no-op if file not found) ─────────────
+try:
+    from dotenv import load_dotenv as _load_dotenv
+    _load_dotenv(Path(__file__).parent.parent / ".env", override=False)
+except ImportError:
+    pass  # python-dotenv not installed; env vars must be set manually
 
 import wandb
 import wandb.errors

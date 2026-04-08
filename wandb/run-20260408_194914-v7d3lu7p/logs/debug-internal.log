@@ -1,0 +1,188 @@
+2026-04-08 19:49:14,687 INFO    StreamThr :66860 [internal.py:wandb_internal():85] W&B internal server running at pid: 66860, started at: 2026-04-08 19:49:14.687290
+2026-04-08 19:49:14,688 DEBUG   HandlerThread:66860 [handler.py:handle_request():158] handle_request: status
+2026-04-08 19:49:14,695 INFO    WriterThread:66860 [datastore.py:open_for_write():87] open: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260408_194914-v7d3lu7p/run-v7d3lu7p.wandb
+2026-04-08 19:49:14,696 DEBUG   SenderThread:66860 [sender.py:send():378] send: header
+2026-04-08 19:49:14,719 DEBUG   SenderThread:66860 [sender.py:send():378] send: run
+2026-04-08 19:49:15,053 ERROR   SenderThread:66860 [internal_api.py:execute():344] 401 response executing GraphQL.
+2026-04-08 19:49:15,053 ERROR   SenderThread:66860 [internal_api.py:execute():345] {"errors":[{"message":"user is not logged in","path":["upsertBucket"],"extensions":{"code":"PERMISSION_ERROR"}}],"data":{"upsertBucket":null}}
+2026-04-08 19:49:15,053 ERROR   SenderThread:66860 [sender.py:send_run():970] The API key you provided is either invalid or missing.  If the `WANDB_API_KEY` environment variable is set, make sure it is correct. Otherwise, to resolve this issue, you may try running the 'wandb login --relogin' command. If you are using a local server, make sure that you're using the correct hostname. If you're not sure, you can try logging in again using the 'wandb login --relogin --host [hostname]' command.(Error 401: Unauthorized)
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/lib/retry.py", line 131, in __call__
+    result = self._call_fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/internal_api.py", line 340, in execute
+    return self.client.execute(*args, **kwargs)  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 52, in execute
+    result = self._get_result(document, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/vendor/gql-0.2.0/wandb_gql/client.py", line 60, in _get_result
+    return self.transport.execute(document, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/lib/gql_request.py", line 59, in execute
+    request.raise_for_status()
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.wandb.ai/graphql
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/sender.py", line 968, in send_run
+    server_run = self._init_run(run, config_value_dict)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/sender.py", line 1013, in _init_run
+    server_run, inserted, server_messages = self._api.upsert_run(
+                                            ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/apis/normalize.py", line 73, in wrapper
+    raise err
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/apis/normalize.py", line 41, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/internal_api.py", line 2188, in upsert_run
+    response = self.gql(
+               ^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/internal_api.py", line 312, in gql
+    ret = self._retry_gql(
+          ^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/lib/retry.py", line 147, in __call__
+    retry_timedelta_triggered = check_retry_fn(e)
+                                ^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/util.py", line 965, in check_retry_fn
+    return fallback_retry_fn(e)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/util.py", line 896, in no_retry_auth
+    raise AuthenticationError(
+wandb.errors.AuthenticationError: The API key you provided is either invalid or missing.  If the `WANDB_API_KEY` environment variable is set, make sure it is correct. Otherwise, to resolve this issue, you may try running the 'wandb login --relogin' command. If you are using a local server, make sure that you're using the correct hostname. If you're not sure, you can try logging in again using the 'wandb login --relogin --host [hostname]' command.(Error 401: Unauthorized)
+2026-04-08 19:49:15,157 INFO    StreamThr :66860 [internal.py:wandb_internal():85] W&B internal server running at pid: 66860, started at: 2026-04-08 19:49:15.157552
+2026-04-08 19:49:15,158 DEBUG   HandlerThread:66860 [handler.py:handle_request():158] handle_request: status
+2026-04-08 19:49:15,159 INFO    WriterThread:66860 [datastore.py:open_for_write():87] open: /Users/yasuhiro/Downloads/DAI-CICS/wandb/offline-run-20260408_194915-c0ssirwm/run-c0ssirwm.wandb
+2026-04-08 19:49:15,182 DEBUG   HandlerThread:66860 [handler.py:handle_request():158] handle_request: run_start
+2026-04-08 19:49:15,187 DEBUG   HandlerThread:66860 [system_info.py:__init__():26] System info init
+2026-04-08 19:49:15,187 DEBUG   HandlerThread:66860 [system_info.py:__init__():41] System info init done
+2026-04-08 19:49:15,187 INFO    HandlerThread:66860 [system_monitor.py:start():194] Starting system monitor
+2026-04-08 19:49:15,187 INFO    SystemMonitor:66860 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2026-04-08 19:49:15,187 INFO    HandlerThread:66860 [system_monitor.py:probe():214] Collecting system info
+2026-04-08 19:49:15,188 INFO    SystemMonitor:66860 [interfaces.py:start():188] Started cpu monitoring
+2026-04-08 19:49:15,189 INFO    SystemMonitor:66860 [interfaces.py:start():188] Started disk monitoring
+2026-04-08 19:49:15,190 INFO    SystemMonitor:66860 [interfaces.py:start():188] Started gpuapple monitoring
+2026-04-08 19:49:15,193 INFO    SystemMonitor:66860 [interfaces.py:start():188] Started memory monitoring
+2026-04-08 19:49:15,193 INFO    SystemMonitor:66860 [interfaces.py:start():188] Started network monitoring
+2026-04-08 19:49:15,292 ERROR   gpuapple  :66860 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-08 19:49:15,370 ERROR   HandlerThread:66860 [gpu_apple.py:probe():176] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 164, in probe
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-08 19:49:15,370 DEBUG   HandlerThread:66860 [system_info.py:probe():150] Probing system
+2026-04-08 19:49:15,374 DEBUG   HandlerThread:66860 [system_info.py:_probe_git():135] Probing git
+2026-04-08 19:49:15,397 DEBUG   HandlerThread:66860 [system_info.py:_probe_git():143] Probing git done
+2026-04-08 19:49:15,397 DEBUG   HandlerThread:66860 [system_info.py:probe():198] Probing system done
+2026-04-08 19:49:15,397 DEBUG   HandlerThread:66860 [system_monitor.py:probe():223] {'os': 'macOS-13.2.1-arm64-arm-64bit', 'python': '3.11.3', 'heartbeatAt': '2026-04-08T10:49:15.371034', 'startedAt': '2026-04-08T10:49:15.149816', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': '/Users/yasuhiro/Downloads/DAI-CICS/src/wandb_eval.py', 'codePathLocal': 'src/wandb_eval.py', 'codePath': 'src/wandb_eval.py', 'git': {'remote': 'https://github.com/ciao521/DAI-CICS.git', 'commit': 'e16ac2d8ee5f8e6309aee1d7f9e63a2c7f23325c'}, 'email': 'yshr.i@icloud.com', 'root': '/Users/yasuhiro/Downloads/DAI-CICS', 'host': 'yasuhironoMacBook-Air.local', 'username': 'yasuhiro', 'executable': '/Users/yasuhiro/.pyenv/versions/3.11.3/bin/python', 'cpu_count': 8, 'cpu_count_logical': 8, 'disk': {'/': {'total': 228.27386474609375, 'used': 12.241790771484375}}, 'gpuapple': {'type': 'arm', 'vendor': 'Apple'}, 'memory': {'total': 8.0}}
+2026-04-08 19:49:15,397 INFO    HandlerThread:66860 [system_monitor.py:probe():224] Finished collecting system info
+2026-04-08 19:49:15,397 INFO    HandlerThread:66860 [system_monitor.py:probe():227] Publishing system info
+2026-04-08 19:49:15,398 INFO    HandlerThread:66860 [system_monitor.py:probe():229] Finished publishing system info
+2026-04-08 19:49:15,584 DEBUG   HandlerThread:66860 [handler.py:handle_request():158] handle_request: python_packages
+2026-04-08 19:49:17,421 ERROR   gpuapple  :66860 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-08 19:49:18,830 DEBUG   HandlerThread:66860 [handler.py:handle_request():158] handle_request: partial_history
+2026-04-08 19:49:19,549 ERROR   gpuapple  :66860 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-08 19:49:20,081 DEBUG   HandlerThread:66860 [handler.py:handle_request():158] handle_request: status_report
+2026-04-08 19:49:20,181 DEBUG   HandlerThread:66860 [handler.py:handle_request():158] handle_request: status_report
+2026-04-08 19:49:20,181 DEBUG   SenderThread:66860 [sender.py:send_request():405] send_request: status_report
+2026-04-08 19:49:21,669 ERROR   gpuapple  :66860 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-08 19:49:23,665 DEBUG   HandlerThread:66860 [handler.py:handle_request():158] handle_request: partial_history
+2026-04-08 19:49:23,789 ERROR   gpuapple  :66860 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-08 19:49:25,101 DEBUG   HandlerThread:66860 [handler.py:handle_request():158] handle_request: status_report
+2026-04-08 19:49:25,206 DEBUG   HandlerThread:66860 [handler.py:handle_request():158] handle_request: status_report
+2026-04-08 19:49:25,206 DEBUG   SenderThread:66860 [sender.py:send_request():405] send_request: status_report
+2026-04-08 19:49:25,920 ERROR   gpuapple  :66860 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-08 19:49:27,122 DEBUG   HandlerThread:66860 [handler.py:handle_request():158] handle_request: partial_history
+2026-04-08 19:49:28,049 ERROR   gpuapple  :66860 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-08 19:49:30,122 DEBUG   HandlerThread:66860 [handler.py:handle_request():158] handle_request: status_report
+2026-04-08 19:49:30,160 ERROR   gpuapple  :66860 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-08 19:49:30,226 DEBUG   HandlerThread:66860 [handler.py:handle_request():158] handle_request: status_report
+2026-04-08 19:49:30,226 DEBUG   SenderThread:66860 [sender.py:send_request():405] send_request: status_report
+2026-04-08 19:49:31,222 INFO    cpu       :66860 [interfaces.py:monitor():138] Process cpu has exited.
+2026-04-08 19:49:31,222 INFO    memory    :66860 [interfaces.py:monitor():138] Process proc.memory.rssMB has exited.
+2026-04-08 19:49:31,223 DEBUG   SystemMonitor:66860 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2026-04-08 19:49:31,223 DEBUG   SystemMonitor:66860 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2026-04-08 19:49:31,224 DEBUG   SystemMonitor:66860 [system_monitor.py:_start():183] Publishing last batch of metrics
+2026-04-08 19:49:31,249 INFO    MainThread:66860 [internal.py:handle_exit():75] Internal process exited
+2026-04-08 19:49:31,249 INFO    MainThread:66860 [internal.py:handle_exit():75] Internal process exited
