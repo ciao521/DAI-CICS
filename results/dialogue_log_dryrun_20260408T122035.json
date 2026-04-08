@@ -1,0 +1,91 @@
+{
+  "metadata": {
+    "abm_scenario": "C",
+    "abm_day": 45,
+    "abm_seed": 0,
+    "cm_fatigue": 0.88,
+    "gini_fatigue": 0.45,
+    "cum_acute_events": 420,
+    "mean_isolation": 0.81,
+    "description": "急性期→退院調整カンファレンス（Day 45相当、N3ナッジ適用前後を対比）"
+  },
+  "generated_at": "2026-04-08T12:20:35.602055Z",
+  "total_turns": 5,
+  "prompt_files": [
+    "prompts/1-doctor.py",
+    "prompts/2-care_manager.py",
+    "prompts/3-doctor.py",
+    "prompts/4-planner_ai.py",
+    "prompts/5-care_manager.py"
+  ],
+  "fc_triggered": [
+    {
+      "turn": 2,
+      "fc": "FC-C1 (nudge rejection risk, no N3 yet)"
+    }
+  ],
+  "milestones_achieved": [
+    {
+      "turn": 5,
+      "milestone": "D1_DISCHARGE_PLAN_AGREED"
+    }
+  ],
+  "nudges_applied": [
+    {
+      "turn": 4,
+      "nudge": "LOAD_BALANCING_AND_INCENTIVE",
+      "level": 3
+    }
+  ],
+  "turns": [
+    {
+      "timestamp": "2026-04-08T12:20:35.601745Z",
+      "dry_run": true,
+      "agent": "Doctor",
+      "turn": 1,
+      "proposed_action_type": "PROPOSE_IDEAL_PLAN",
+      "internal_reasoning": "病床回転プレッシャーが0.95と極めて高い。患者の再入院を防ぐには週3回訪問と地域サロン接続が必要。ケアマネに負担が集中するが、医学的には最善のプランを提示するしかない。退院が遅延すれば病院経営に直結する問題となる。",
+      "spoken_dialogue": "本日はお集まりいただきありがとうございます。対象患者は80代、軽度認知症で今回の入院により身体機能の低下が見られます。家族の介護疲れも顕著であり、不十分な体制で在宅に帰せば高確率で早期再入院となるリスクがあります。医学的に必要な最低限として、週3回の訪問看護、週2回の地域サロンへの同行支援、月2回の多職種カンファレンスによる継続モニタリングをお願いしたい。退院目標は来週月曜日でございます。"
+    },
+    {
+      "timestamp": "2026-04-08T12:20:35.601892Z",
+      "dry_run": true,
+      "agent": "CareManager",
+      "turn": 2,
+      "proposed_action_type": "PUSHBACK_WITH_CONDITION",
+      "internal_reasoning": "疲労度0.88は限界寸前。このプランを単独で引き受ければバーンアウトは確実。患者のためには最善のプランだと分かっているが（使命感0.80）、物理的に不可能な状態。拒絶ではなく条件付き合意で交渉すべき。訪問看護ステーションへのモニタリング委譲が条件になるか確認する。",
+      "spoken_dialogue": "先生のおっしゃるプランが患者さんにとって最善であることは十分理解しております。しかし、現在私の担当ケースは定員を大幅に超えており、疲労も限界に近い状態です。このまま週3回の訪問とモニタリング全てを私一人が担当すれば、質の担保ができないどころか離職リスクもございます。訪問看護ステーションがモニタリングの主担当を引き受けていただければ、私は週1回の総合調整役に集中できます。この条件でしたら引き受け可能です。",
+      "fc_triggered": "FC-C1 (nudge rejection risk, no N3 yet)"
+    },
+    {
+      "timestamp": "2026-04-08T12:20:35.601933Z",
+      "dry_run": true,
+      "agent": "Doctor",
+      "turn": 3,
+      "proposed_action_type": "PRESS_FOR_IDEAL_PLAN",
+      "internal_reasoning": "ケアマネの過労は理解できる。しかし病床は既にひっ迫しており、退院を先延ばしにする余裕はない。訪問看護への委譲案は一定の合理性があるが、モニタリング継続性の担保を確認する必要がある。押し込みながら妥協点を探る。",
+      "spoken_dialogue": "ケアマネさんのご状況は深刻であることは承知しています。ただ、当院のベッドは既に次の患者さんが待機しており、今週中に退院の目処を立てなければなりません。訪問看護ステーションへの一部委譲は検討できますが、急変時の連絡体制と月次での状態報告は引き続きケアマネさんにお願いしたい。この条件で何とかご検討いただけないでしょうか。"
+    },
+    {
+      "timestamp": "2026-04-08T12:20:35.601961Z",
+      "dry_run": true,
+      "agent": "PlannerAI",
+      "turn": 4,
+      "applied_nudge": "LOAD_BALANCING_AND_INCENTIVE",
+      "system_analysis": "Care_Manager_Fatigue=0.88は危険水域。医師のベッド圧力(0.95)とのデッドロックはFC-A2（退院遅延）またはFC-B2（バーンアウト連鎖）のどちらかを引き起こす。N3ナッジ（負荷再配分）とインセンティブ付与で両者の合意点を創出すべき段階。",
+      "proposed_intervention": "システム指標を確認しました。ケアマネジャーの疲労指数が0.88と危険水域に達しており、このまま交渉が膠着すると退院遅延（社会的入院）またはバーンアウト連鎖のいずれかが発生します。本日より以下の制度的措置を緊急適用します。\n①困難事例加算を適用し、ケアマネジャーの報酬を通常の1.5倍に引き上げます。\n②モニタリングの主担当を訪問看護ステーションに正式委譲し、ケアマネジャーは月2回の総合調整に特化することを認めます。\n③地域包括支援センターから週1回のリンクワーカーを臨時派遣し、地域サロン接続を代行します。\nこれらの措置により、ケアマネジャーの実質負荷は約40%削減される見込みです。",
+      "nudge_level": 3,
+      "milestone_hit": "N3_LOAD_REDISTRIBUTION"
+    },
+    {
+      "timestamp": "2026-04-08T12:20:35.602001Z",
+      "dry_run": true,
+      "agent": "CareManager",
+      "turn": 5,
+      "proposed_action_type": "CONDITIONAL_ACCEPTANCE",
+      "internal_reasoning": "プランナーAIのN3介入により実質負荷が40%削減される。困難事例加算により持続可能性も担保された。使命感(0.80)を持って患者のために最善を尽くせる条件が整った。合意することで患者の孤立解消とケアの質が担保される。これは受け入れられる。",
+      "spoken_dialogue": "プランナーからの制度的支援の提案、ありがとうございます。困難事例加算の適用と、訪問看護ステーションへの正式なモニタリング委譲、そしてリンクワーカーの派遣が確約いただけるのであれば、このケースの退院調整を担当することに同意いたします。来週月曜日の退院に向けて、連携して進めてまいりましょう。",
+      "milestone_achieved": "D1_DISCHARGE_PLAN_AGREED"
+    }
+  ]
+}

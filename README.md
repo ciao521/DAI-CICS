@@ -443,9 +443,9 @@ results/dialogue_log_dryrun_20260408T095957.json # ドライラン版
 
 ```bash
 # ABM を実行し、日次メトリクスをリアルタイムで W&B にログ（LLM なし）
-python -m src.wandb_eval --abm-only --scenario A --days 100 --seeds 3
-python -m src.wandb_eval --abm-only --scenario B --days 100 --seeds 3
-python -m src.wandb_eval --abm-only --scenario C --days 100 --seeds 3
+python -m src.wandb_eval --abm-only --scenario A --days 100 --seeds 10
+python -m src.wandb_eval --abm-only --scenario B --days 100 --seeds 10
+python -m src.wandb_eval --abm-only --scenario C --days 100 --seeds 10
 ```
 
 **役割**: W&B ダッシュボード上で日次指標（`sdh_risk`, `fatigue`, `burnout` 等）の時系列をインタラクティブに確認できる。APIキー無効時は `wandb/offline-run-*/` にローカル保存。
@@ -456,11 +456,9 @@ python -m src.wandb_eval --abm-only --scenario C --days 100 --seeds 3
 
 ```bash
 # シナリオA: 5ステップのエージェント行動 + Judge 採点
-python -m src.wandb_eval --scenario A --steps 5
-
-# シナリオB/C も同様
-python -m src.wandb_eval --scenario B --steps 5
-python -m src.wandb_eval --scenario C --steps 5
+python -m src.wandb_eval --scenario A --steps 15
+python -m src.wandb_eval --scenario B --steps 15
+python -m src.wandb_eval --scenario C --steps 15
 ```
 
 **役割**: シナリオ別の典型状況に対してエージェントにアクションを生成させ、別の LLM（Judge）が `faithfulness`・`context_relevance` を 0–1 で採点。スコアを W&B にログし、ローカルにも保存する。

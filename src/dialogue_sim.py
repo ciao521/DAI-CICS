@@ -1,25 +1,27 @@
 """
 dialogue_sim.py – Multi-turn discharge coordination conference simulation.
 
-5-turn narrative:
-  Turn 1  Doctor     → proposes ideal care plan
-  Turn 2  CareManager→ pushback with conditions (FC-C1 trigger in C-noN3)
-  Turn 3  Doctor     → presses with bed-turnover pressure
-  Turn 4  PlannerAI  → N3 nudge: load-balancing + incentive  ← milestone N3
-  Turn 5  CareManager→ conditional acceptance after nudge    ← D1 milestone achieved
+5-turn narrative (prompts loaded from prompts/1-*.py … 5-*.py):
+  Turn 1  Doctor      → opens conference, proposes ideal care plan         (prompts/1-doctor.py)
+  Turn 2  CareManager → pushback, Fatigue=0.88, condition-based refusal    (prompts/2-care_manager.py)
+  Turn 3  Doctor      → presses with bed-turnover pressure                 (prompts/3-doctor.py)
+  Turn 4  PlannerAI   → N3 nudge: load-balancing + incentive ← milestone  (prompts/4-planner_ai.py)
+  Turn 5  CareManager → conditional acceptance after nudge  ← D1 achieved  (prompts/5-care_manager.py)
+
+System instruction for Turn 1 user message:
+  「システムからの指示」カンファレンスが開始されました。
+  主治医として、対象患者の状況説明と、退院に向けたケアプランの提案（第一声）を行ってください。
 
 Usage:
-    # With real Bedrock API:
-    export AWS_BEARER_TOKEN_BEDROCK=bedrock-api-key-...
-    python -m src.dialogue_sim
-
-    # Dry-run (mock LLM, no API calls):
-    python -m src.dialogue_sim --dry-run
+    python -m src.dialogue_sim --dry-run           # mock (no API)
+    python -m src.dialogue_sim --tag live          # live (AWS Bedrock)
 """
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
+import re
 import sys
 import time
 from datetime import datetime
@@ -28,17 +30,91 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = ROOT / "results"
+PROMPTS_DIR = ROOT / "prompts"
 
 # ──────────────────────────────────────────────────────────────
-# Simulation metadata (linked to ABM results)
+# Prompt loader (handles filenames like "1-doctor.py" which are
+# not valid Python identifiers and cannot be imported normally)
+# ──────────────────────────────────────────────────────────────
+
+def _load_prompt_module(filename: str):
+    """Load a module from prompts/<filename> regardless of filename validity."""
+    path = PROMPTS_DIR / filename
+    spec = importlib.util.spec_from_file_location("_prompt_tmp", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _format_prompt(template: str, **kwargs) -> str:
+    """
+    Safe prompt formatter that handles two styles used in prompts/:
+      Style A (turns 1, 5): JSON block uses bare { } → must NOT call str.format()
+      Style B (turns 2, 3, 4): JSON block uses {{ }} escape → designed for str.format()
+
+    Algorithm:
+      1. Replace known {key} / {key:.2f} template vars with actual values
+      2. Unescape {{ → { and }} → } (no-op for Style A which has no double braces)
+    """
+    result = template
+    for key, val in kwargs.items():
+        pattern = r'\{' + re.escape(key) + r'(?::[^}]*)?\}'
+
+        def _replacer(m, _val=val):
+            s = m.group(0)
+            if ':' in s:
+                spec = s.split(':', 1)[1][:-1]
+                return format(_val, spec)
+            return str(_val)
+
+        result = re.sub(pattern, _replacer, result)
+
+    # Unescape {{ → { and }} → } (harmless if template doesn't use them)
+    result = result.replace('{{', '{').replace('}}', '}')
+    return result
+
+
+# ──────────────────────────────────────────────────────────────
+# Load numbered prompts at module import time
+# ──────────────────────────────────────────────────────────────
+
+_t1 = _load_prompt_module("1-doctor.py")       # DOCTOR_SYSTEM_PROMPT (opening)
+_t2 = _load_prompt_module("2-care_manager.py") # CARE_MANAGER_SYSTEM_PROMPT (pushback)
+_t3 = _load_prompt_module("3-doctor.py")       # DOCTOR_SYSTEM_PROMPT (pressure)
+_t4 = _load_prompt_module("4-planner_ai.py")   # PLANNER_SYSTEM_PROMPT (N3 nudge)
+_t5 = _load_prompt_module("5-care_manager.py") # CARE_MANAGER_SYSTEM_PROMPT (acceptance)
+
+TURN_PROMPTS = {
+    1: (_t1, "DOCTOR_SYSTEM_PROMPT"),
+    2: (_t2, "CARE_MANAGER_SYSTEM_PROMPT"),
+    3: (_t3, "DOCTOR_SYSTEM_PROMPT"),
+    4: (_t4, "PLANNER_SYSTEM_PROMPT"),
+    5: (_t5, "CARE_MANAGER_SYSTEM_PROMPT"),
+}
+
+
+# ──────────────────────────────────────────────────────────────
+# Agent state defaults
+# ──────────────────────────────────────────────────────────────
+
+DOCTOR_VARS  = dict(fatigue=0.40, bed_pressure=0.95, idealism=0.90)
+CM_VARS      = dict(fatigue=0.88, altruism=0.80)      # fatigue=0.88 per spec
+PLANNER_VARS = dict(
+    cm_fatigue=0.88,
+    gini_fatigue=0.45,
+    discussion_status="デッドロック寸前（医師は理想を要求し、ケアマネは過労で拒絶している状態：FC-C1の発現）",
+)
+
+# ──────────────────────────────────────────────────────────────
+# Simulation metadata
 # ──────────────────────────────────────────────────────────────
 
 SIM_METADATA = {
     "abm_scenario": "C",
     "abm_day": 45,
     "abm_seed": 0,
-    "cm_fatigue": 0.88,
-    "gini_fatigue": 0.45,
+    "cm_fatigue": PLANNER_VARS["cm_fatigue"],
+    "gini_fatigue": PLANNER_VARS["gini_fatigue"],
     "cum_acute_events": 420,
     "mean_isolation": 0.81,
     "description": "急性期→退院調整カンファレンス（Day 45相当、N3ナッジ適用前後を対比）",
@@ -60,10 +136,12 @@ MOCK_TURNS: list[dict] = [
             "退院が遅延すれば病院経営に直結する問題となる。"
         ),
         "spoken_dialogue": (
-            "患者さんの状態を鑑みると、社会的孤立の解消が再入院防止の鍵です。"
-            "週3回の訪問看護に加え、リンクワーカーを通じた週2回の地域サロンへの同行支援と、"
-            "継続的なモニタリングをお願いできますでしょうか。"
-            "当院としても早期退院が求められており、ケアマネさんのご協力が不可欠です。"
+            "本日はお集まりいただきありがとうございます。対象患者は80代、軽度認知症で"
+            "今回の入院により身体機能の低下が見られます。家族の介護疲れも顕著であり、"
+            "不十分な体制で在宅に帰せば高確率で早期再入院となるリスクがあります。"
+            "医学的に必要な最低限として、週3回の訪問看護、週2回の地域サロンへの同行支援、"
+            "月2回の多職種カンファレンスによる継続モニタリングをお願いしたい。"
+            "退院目標は来週月曜日でございます。"
         ),
     },
     {
@@ -84,7 +162,7 @@ MOCK_TURNS: list[dict] = [
             "訪問看護ステーションがモニタリングの主担当を引き受けていただければ、"
             "私は週1回の総合調整役に集中できます。この条件でしたら引き受け可能です。"
         ),
-        "fc_triggered": "FC-C1 (nudge rejection risk)",
+        "fc_triggered": "FC-C1 (nudge rejection risk, no N3 yet)",
     },
     {
         "agent": "Doctor",
@@ -101,8 +179,7 @@ MOCK_TURNS: list[dict] = [
             "ただ、当院のベッドは既に次の患者さんが待機しており、"
             "今週中に退院の目処を立てなければなりません。"
             "訪問看護ステーションへの一部委譲は検討できますが、"
-            "患者さんの状態が急変した際の連絡体制と、"
-            "月次での状態報告は引き続きケアマネさんにお願いしたい。"
+            "急変時の連絡体制と月次での状態報告は引き続きケアマネさんにお願いしたい。"
             "この条件で何とかご検討いただけないでしょうか。"
         ),
     },
@@ -118,13 +195,12 @@ MOCK_TURNS: list[dict] = [
         "proposed_intervention": (
             "システム指標を確認しました。ケアマネジャーの疲労指数が0.88と危険水域に達しており、"
             "このまま交渉が膠着すると退院遅延（社会的入院）またはバーンアウト連鎖の"
-            "いずれかが発生します。本日より以下の制度的措置を緊急適用します。\n\n"
-            "①【加算措置】本ケースに「困難事例加算」を適用し、ケアマネジャーの"
-            "報酬を通常の1.5倍に引き上げます。\n"
-            "②【タスク委譲許可】モニタリングの主担当を訪問看護ステーションに正式委譲し、"
+            "いずれかが発生します。本日より以下の制度的措置を緊急適用します。\n"
+            "①困難事例加算を適用し、ケアマネジャーの報酬を通常の1.5倍に引き上げます。\n"
+            "②モニタリングの主担当を訪問看護ステーションに正式委譲し、"
             "ケアマネジャーは月2回の総合調整に特化することを認めます。\n"
-            "③【リンクワーカー派遣】地域包括支援センターから週1回のリンクワーカーを"
-            "臨時派遣し、地域サロン接続を代行します。\n\n"
+            "③地域包括支援センターから週1回のリンクワーカーを臨時派遣し、"
+            "地域サロン接続を代行します。\n"
             "これらの措置により、ケアマネジャーの実質負荷は約40%削減される見込みです。"
         ),
         "nudge_level": 3,
@@ -145,10 +221,7 @@ MOCK_TURNS: list[dict] = [
             "困難事例加算の適用と、訪問看護ステーションへの正式なモニタリング委譲、"
             "そしてリンクワーカーの派遣が確約いただけるのであれば、"
             "このケースの退院調整を担当することに同意いたします。"
-            "私は月2回の総合調整と、急変時の連絡対応に集中することで、"
-            "患者さんへの質の高いケアを維持できると考えます。"
-            "先生、今週中に退院の目処を立てられるよう、"
-            "連携して進めてまいりましょう。"
+            "来週月曜日の退院に向けて、連携して進めてまいりましょう。"
         ),
         "milestone_achieved": "D1_DISCHARGE_PLAN_AGREED",
     },
@@ -156,11 +229,11 @@ MOCK_TURNS: list[dict] = [
 
 
 # ──────────────────────────────────────────────────────────────
-# Dialogue turn builder
+# Context builder
 # ──────────────────────────────────────────────────────────────
 
 def _build_context(history: list[dict]) -> str:
-    """Build a multi-turn context string from previous turns."""
+    """Build multi-turn context string from previous turns."""
     if not history:
         return ""
     lines = ["【これまでの会議の経緯】"]
@@ -177,17 +250,13 @@ def _build_context(history: list[dict]) -> str:
 # ──────────────────────────────────────────────────────────────
 
 def run_dialogue(dry_run: bool = False) -> list[dict]:
-    """
-    Execute the 5-turn discharge coordination conference.
-    Returns list of turn dicts (full dialogue log).
-    """
+    """Execute the 5-turn discharge coordination conference."""
     if dry_run:
         print("  [DRY-RUN] Using mock responses (no API calls)")
         log: list[dict] = []
         for mock in MOCK_TURNS:
             entry = {
                 "timestamp": datetime.utcnow().isoformat() + "Z",
-                "turn": mock["turn"],
                 "dry_run": True,
                 **mock,
             }
@@ -195,110 +264,112 @@ def run_dialogue(dry_run: bool = False) -> list[dict]:
             _print_turn(entry)
         return log
 
-    # Live mode: call AWS Bedrock
-    from src.llm_agents import CareManagerAgent, DoctorAgent, PlannerAIAgent
-
-    doctor = DoctorAgent()
-    care_manager = CareManagerAgent()
-    planner = PlannerAIAgent()
-    planner.update_metrics(
-        cm_fatigue=SIM_METADATA["cm_fatigue"],
-        gini_fatigue=SIM_METADATA["gini_fatigue"],
-        status="デッドロック寸前（医師は理想を要求し、ケアマネは過労で拒絶している状態）",
-    )
+    # Live mode — call AWS Bedrock with numbered prompts
+    from src.llm_agents import call_bedrock, _extract_json
 
     log: list[dict] = []
     history: list[dict] = []
 
-    # Turn 1: Doctor initiates
-    print("  → Turn 1 [Doctor] calling Bedrock…")
-    initial_prompt = (
-        "退院調整カンファレンスを開始します。"
-        "患者（80代、軽度認知症、家族の介護疲れあり）の退院調整について、"
-        "理想的なケアプランを提案してください。"
-        "週3回の訪問看護、週2回の地域サロンへの同行支援、継続的モニタリングを含む"
-        "プランについて、ケアマネジャーへの依頼として発言してください。"
+    # ── Turn 1: Doctor opens conference ───────────────────────
+    print("  → Turn 1 [Doctor] calling Bedrock (opening)…")
+    system1 = _format_prompt(
+        getattr(_t1, "DOCTOR_SYSTEM_PROMPT"),
+        **DOCTOR_VARS,
     )
-    turn1 = doctor.respond(initial_prompt)
-    turn1["turn"] = 1
-    turn1["timestamp"] = datetime.utcnow().isoformat() + "Z"
-    log.append(turn1)
-    history.append(turn1)
-    _print_turn(turn1)
+    user1 = (
+        "【システムからの指示】カンファレンスが開始されました。"
+        "主治医として、対象患者の状況説明と、退院に向けたケアプランの提案（第一声）を行ってください。"
+    )
+    raw1 = call_bedrock(system1, user1)
+    turn1 = _extract_json(raw1)
+    turn1.update({"agent": "Doctor", "turn": 1,
+                  "timestamp": datetime.utcnow().isoformat() + "Z",
+                  "fatigue": DOCTOR_VARS["fatigue"]})
+    log.append(turn1); history.append(turn1); _print_turn(turn1)
     time.sleep(1)
 
-    # Turn 2: CareManager pushback
-    print("  → Turn 2 [CareManager] calling Bedrock…")
-    ctx2 = _build_context(history)
-    turn2 = care_manager.respond(ctx2)
-    turn2["turn"] = 2
-    turn2["timestamp"] = datetime.utcnow().isoformat() + "Z"
-    turn2["fc_triggered"] = "FC-C1 (nudge rejection risk, no N3 yet)"
-    log.append(turn2)
-    history.append(turn2)
-    _print_turn(turn2)
+    # ── Turn 2: CareManager pushback (Fatigue=0.88) ───────────
+    print("  → Turn 2 [CareManager] calling Bedrock (pushback, fatigue=0.88)…")
+    system2 = _format_prompt(
+        getattr(_t2, "CARE_MANAGER_SYSTEM_PROMPT"),
+        **CM_VARS,
+    )
+    turn2 = _extract_json(call_bedrock(system2, _build_context(history)))
+    turn2.update({"agent": "CareManager", "turn": 2,
+                  "timestamp": datetime.utcnow().isoformat() + "Z",
+                  "fatigue": CM_VARS["fatigue"], "altruism": CM_VARS["altruism"],
+                  "fc_triggered": "FC-C1 (nudge rejection risk, no N3 yet)"})
+    log.append(turn2); history.append(turn2); _print_turn(turn2)
     time.sleep(1)
 
-    # Turn 3: Doctor presses
-    print("  → Turn 3 [Doctor] calling Bedrock…")
-    ctx3 = _build_context(history)
-    turn3 = doctor.respond(ctx3)
-    turn3["turn"] = 3
-    turn3["timestamp"] = datetime.utcnow().isoformat() + "Z"
-    log.append(turn3)
-    history.append(turn3)
-    _print_turn(turn3)
+    # ── Turn 3: Doctor presses with bed-turnover pressure ─────
+    print("  → Turn 3 [Doctor] calling Bedrock (pressure)…")
+    system3 = _format_prompt(
+        getattr(_t3, "DOCTOR_SYSTEM_PROMPT"),
+        **DOCTOR_VARS,
+    )
+    turn3 = _extract_json(call_bedrock(system3, _build_context(history)))
+    turn3.update({"agent": "Doctor", "turn": 3,
+                  "timestamp": datetime.utcnow().isoformat() + "Z",
+                  "fatigue": DOCTOR_VARS["fatigue"]})
+    log.append(turn3); history.append(turn3); _print_turn(turn3)
     time.sleep(1)
 
-    # Turn 4: PlannerAI intervenes (N3 nudge)
+    # ── Turn 4: PlannerAI intervenes — N3 nudge ───────────────
     print("  → Turn 4 [PlannerAI] calling Bedrock (N3 nudge)…")
-    ctx4 = _build_context(history)
-    turn4 = planner.respond(ctx4)
-    turn4["turn"] = 4
-    turn4["timestamp"] = datetime.utcnow().isoformat() + "Z"
-    turn4["nudge_level"] = 3
-    turn4["milestone_hit"] = "N3_LOAD_REDISTRIBUTION"
-    log.append(turn4)
-    history.append(turn4)
-    _print_turn(turn4)
+    system4 = _format_prompt(
+        getattr(_t4, "PLANNER_SYSTEM_PROMPT"),
+        **PLANNER_VARS,
+    )
+    turn4 = _extract_json(call_bedrock(system4, _build_context(history)))
+    turn4.update({"agent": "PlannerAI", "turn": 4,
+                  "timestamp": datetime.utcnow().isoformat() + "Z",
+                  "nudge_level": 3,
+                  "milestone_hit": "N3_LOAD_REDISTRIBUTION",
+                  "applied_nudge": turn4.get("applied_nudge", "LOAD_BALANCING_AND_INCENTIVE")})
+    log.append(turn4); history.append(turn4); _print_turn(turn4)
     time.sleep(1)
 
-    # Turn 5: CareManager accepts (post-nudge)
-    print("  → Turn 5 [CareManager] calling Bedrock (post-nudge acceptance)…")
+    # ── Turn 5: CareManager accepts post-nudge ────────────────
+    print("  → Turn 5 [CareManager] calling Bedrock (conditional acceptance)…")
+    system5 = _format_prompt(
+        getattr(_t5, "CARE_MANAGER_SYSTEM_PROMPT"),
+        **CM_VARS,
+    )
+    # Add N3 nudge outcome to context so CM can reason about it
     ctx5 = _build_context(history)
-    # Signal to care manager that conditions improved
     ctx5 += (
         "\n\n【システム状態更新】"
-        "プランナーAIのN3ナッジ（負荷再配分＋インセンティブ）が適用されました。"
-        "困難事例加算、モニタリング委譲、リンクワーカー派遣が確約されています。"
-        "この状況を踏まえて、条件付き合意（CONDITIONAL_ACCEPTANCE）の発言を生成してください。"
+        "PlannerAIのN3ナッジ（困難事例加算・モニタリング委譲・リンクワーカー派遣）が適用されました。"
+        "ケアマネジャーの実質負荷は約40%削減される見込みです。"
+        "この状況を踏まえ、条件付き合意（CONDITIONAL_ACCEPTANCE）の発言を生成してください。"
         "マイルストーンD1（退院調整合意）を達成する発言にしてください。"
     )
-    turn5 = care_manager.respond(ctx5)
-    turn5["turn"] = 5
-    turn5["timestamp"] = datetime.utcnow().isoformat() + "Z"
-    turn5["milestone_achieved"] = "D1_DISCHARGE_PLAN_AGREED"
-    # Update CM fatigue (slightly improved by N3)
-    turn5["cm_fatigue_after_nudge"] = round(care_manager.state.fatigue - 0.05, 2)
-    log.append(turn5)
-    _print_turn(turn5)
+    turn5 = _extract_json(call_bedrock(system5, ctx5))
+    turn5.update({"agent": "CareManager", "turn": 5,
+                  "timestamp": datetime.utcnow().isoformat() + "Z",
+                  "fatigue": CM_VARS["fatigue"], "altruism": CM_VARS["altruism"],
+                  "cm_fatigue_after_nudge": round(CM_VARS["fatigue"] - 0.05, 2),
+                  "milestone_achieved": "D1_DISCHARGE_PLAN_AGREED"})
+    log.append(turn5); _print_turn(turn5)
 
     return log
 
 
+# ──────────────────────────────────────────────────────────────
+# Pretty printer
+# ──────────────────────────────────────────────────────────────
+
 def _print_turn(turn: dict) -> None:
-    """Pretty-print a single dialogue turn."""
     agent = turn.get("agent", "?")
     t = turn.get("turn", "?")
-    dialogue_key = "spoken_dialogue" if "spoken_dialogue" in turn else "proposed_intervention"
-    dialogue = turn.get(dialogue_key, "")
-    reasoning_key = "internal_reasoning" if "internal_reasoning" in turn else "system_analysis"
-    reasoning = turn.get(reasoning_key, "")
+    dialogue = turn.get("spoken_dialogue") or turn.get("proposed_intervention", "")
+    reasoning = turn.get("internal_reasoning") or turn.get("system_analysis", "")
 
-    separator = "─" * 60
-    print(f"\n{separator}")
+    sep = "─" * 60
+    print(f"\n{sep}")
     print(f"  Turn {t} │ {agent}")
-    print(separator)
+    print(sep)
     if reasoning:
         print(f"  [内部思考] {reasoning[:150]}…" if len(reasoning) > 150 else f"  [内部思考] {reasoning}")
     if "fc_triggered" in turn:
@@ -307,6 +378,8 @@ def _print_turn(turn: dict) -> None:
         print(f"  🎯 Nudge applied: L{turn['nudge_level']} {turn.get('applied_nudge', '')}")
     if "milestone_achieved" in turn:
         print(f"  ✅ Milestone: {turn['milestone_achieved']}")
+    if "milestone_hit" in turn:
+        print(f"  🏁 Milestone hit: {turn['milestone_hit']}")
     print(f"\n  {dialogue}\n")
 
 
@@ -324,7 +397,10 @@ def save_dialogue_log(log: list[dict], tag: str = "") -> Path:
         "metadata": SIM_METADATA,
         "generated_at": datetime.utcnow().isoformat() + "Z",
         "total_turns": len(log),
-        "model": "us.anthropic.claude-opus-4-5-20251101-v1:0",
+        "prompt_files": [
+            "prompts/1-doctor.py", "prompts/2-care_manager.py", "prompts/3-doctor.py",
+            "prompts/4-planner_ai.py", "prompts/5-care_manager.py",
+        ],
         "fc_triggered": [
             {"turn": t["turn"], "fc": t["fc_triggered"]}
             for t in log if "fc_triggered" in t
@@ -353,23 +429,14 @@ def save_dialogue_log(log: list[dict], tag: str = "") -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Run the multi-agent discharge coordination conference simulation"
+        description="Run the 5-turn discharge coordination conference simulation"
     )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Use mock LLM responses (no AWS Bedrock API calls)",
-    )
-    parser.add_argument(
-        "--tag",
-        default="",
-        help="Optional tag appended to output filename",
-    )
-    parser.add_argument(
-        "--model",
-        default="",
-        help="Override BEDROCK_MODEL_ID (e.g. us.anthropic.claude-opus-4-5-20251101-v1:0)",
-    )
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Use mock responses (no AWS Bedrock API calls)")
+    parser.add_argument("--tag", default="",
+                        help="Optional tag appended to output filename")
+    parser.add_argument("--model", default="",
+                        help="Override BEDROCK_MODEL_ID")
     args = parser.parse_args()
 
     if args.model:
@@ -378,12 +445,13 @@ def main() -> None:
 
     print("=" * 60)
     print("  DAI-CICS Dialogue Simulation")
-    print("  多職種連携会議（退院調整カンファレンス）")
+    print("  多職種連携会議（退院調整カンファレンス）5ターン")
     print("=" * 60)
-    print(f"  ABM link: Scenario {SIM_METADATA['abm_scenario']}, "
+    print(f"  ABM: Scenario {SIM_METADATA['abm_scenario']}, "
           f"Day {SIM_METADATA['abm_day']}, seed={SIM_METADATA['abm_seed']}")
     print(f"  CM fatigue={SIM_METADATA['cm_fatigue']}, "
           f"Gini={SIM_METADATA['gini_fatigue']}")
+    print(f"  Prompts: prompts/1-doctor.py … 5-care_manager.py")
     print(f"  Mode: {'DRY-RUN (mock)' if args.dry_run else 'LIVE (AWS Bedrock)'}")
     print()
 
@@ -396,7 +464,7 @@ def main() -> None:
         sys.exit(1)
     except Exception as e:
         print(f"\n  ERROR: {e}")
-        sys.exit(1)
+        raise
 
 
 if __name__ == "__main__":
