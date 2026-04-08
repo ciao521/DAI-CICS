@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAI-CICS シミュレーション デモ</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --border: #2d3148;
+    --text: #e2e8f0; --muted: #8892a4; --accent: #6366f1;
+    --green: #22c55e; --yellow: #f59e0b; --red: #ef4444;
+    --blue: #3b82f6; --purple: #a855f7;
+    --sc-a: #ef4444; --sc-b: #f59e0b; --sc-c: #22c55e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; min-height: 100vh; }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 18px; font-weight: 700; color: var(--accent); }
+  header span { font-size: 12px; color: var(--muted); }
+  .layout { display: grid; grid-template-columns: 280px 1fr 320px; gap: 0; height: calc(100vh - 52px); overflow: hidden; }
+  .panel { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 16px; }
+  .panel:last-child { border-right: none; border-left: 1px solid var(--border); }
+  .main { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+  .card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  h2 { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+  h3 { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .form-group { margin-bottom: 14px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  select, input[type=range], input[type=number] {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text); padding: 6px 8px; font-size: 13px;
+  }
+  input[type=range] { padding: 4px 0; accent-color: var(--accent); }
+  .val-display { text-align: right; font-size: 12px; color: var(--accent); font-weight: 600; margin-top: 2px; }
+  .btn { width: 100%; padding: 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 8px; transition: opacity .2s; }
+  .btn:hover { opacity: .85; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-secondary { background: var(--blue); color: white; }
+  .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .toggle { position: relative; width: 42px; height: 22px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider-t { position: absolute; inset: 0; background: var(--border); border-radius: 22px; cursor: pointer; transition: .3s; }
+  .slider-t:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; }
+  input:checked + .slider-t { background: var(--accent); }
+  input:checked + .slider-t:before { transform: translateX(20px); }
+  /* Scenario badge */
+  .sc-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+  .sc-A { background: #ef444420; color: var(--sc-a); border: 1px solid var(--sc-a); }
+  .sc-B { background: #f59e0b20; color: var(--sc-b); border: 1px solid var(--sc-b); }
+  .sc-C { background: #22c55e20; color: var(--sc-c); border: 1px solid var(--sc-c); }
+  /* Context metrics */
+  .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+  .metric-label { font-size: 10px; color: var(--muted); }
+  .metric-value { font-size: 18px; font-weight: 700; color: var(--text); }
+  .metric-value.warn { color: var(--yellow); }
+  .metric-value.danger { color: var(--red); }
+  .metric-value.good { color: var(--green); }
+  /* Turn cards */
+  .turn-card { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+  .turn-header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .turn-num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .turn-agent { font-weight: 700; font-size: 13px; }
+  .turn-badge { margin-left: auto; font-size: 10px; }
+  .turn-body { padding: 10px 12px; }
+  .turn-reasoning { font-size: 11px; color: var(--muted); background: var(--surface); border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; border-left: 3px solid var(--accent); }
+  .turn-dialogue { font-size: 13px; line-height: 1.7; }
+  .turn-fc { font-size: 11px; color: var(--red); margin-top: 4px; }
+  .turn-ms { font-size: 11px; color: var(--green); margin-top: 4px; }
+  /* Eval cards */
+  .eval-record { border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+  .eval-scores { display: flex; gap: 8px; margin-top: 6px; }
+  .score-pill { font-size: 12px; padding: 3px 8px; border-radius: 12px; font-weight: 600; }
+  .score-high { background: #22c55e20; color: var(--green); }
+  .score-mid { background: #f59e0b20; color: var(--yellow); }
+  .score-low { background: #ef444420; color: var(--red); }
+  .summary-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; display: flex; gap: 16px; align-items: center; }
+  /* Chart container */
+  .chart-wrap { position: relative; height: 220px; }
+  /* Status bar */
+  .status { font-size: 11px; color: var(--muted); padding: 4px 0; }
+  .status.loading { color: var(--accent); }
+  .status.error { color: var(--red); }
+  /* Override inputs */
+  .override-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .override-grid input { padding: 5px 8px; font-size: 12px; }
+  /* Chart selector */
+  .chart-tabs { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
+  .chart-tab { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--muted); transition: .15s; }
+  .chart-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+  .loading-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty-state { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🏥 DAI-CICS デモ</h1>
+  <span>医療・介護ネットワーク ABM × 会話シミュレーション × LLM評価</span>
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+    <span id="api-status" class="status">● API接続中...</span>
+    <a href="/docs" target="_blank" style="font-size:11px;color:var(--accent);">API Docs</a>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- ── LEFT PANEL: Controls ── -->
+  <div class="panel">
+    <h2>🔧 実験条件</h2>
+
+    <div class="form-group">
+      <label>シナリオ</label>
+      <select id="sel-scenario">
+        <option value="A">A — ホモ・エコノミカス分断</option>
+        <option value="B">B — 共同体過依存・搾取</option>
+        <option value="C" selected>C — AI支援・超包括ケア</option>
+        <option value="C-noN2">C-noN2 — N2なしアブレーション</option>
+        <option value="C-noN3">C-noN3 — N3なしアブレーション</option>
+        <option value="C-onlyL1">C-onlyL1 — 情報提示のみ</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Day（ABMの何日目か）</label>
+      <input type="range" id="sel-day" min="1" max="100" value="45">
+      <div class="val-display">Day <span id="day-val">45</span></div>
+    </div>
+
+    <div class="form-group">
+      <label>Seed</label>
+      <select id="sel-seed">
+        <option value="0">Seed 0</option><option value="1">Seed 1</option><option value="2">Seed 2</option>
+        <option value="3">Seed 3</option><option value="4">Seed 4</option><option value="5">Seed 5</option>
+        <option value="6">Seed 6</option><option value="7">Seed 7</option><option value="8">Seed 8</option>
+        <option value="9">Seed 9</option>
+      </select>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;margin-bottom:12px;">
+      <h2>🎛 手動オーバーライド</h2>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">空欄ならCSVの値を使用</p>
+      <div class="override-grid">
+        <div>
+          <label>CM疲労度 (0-1)</label>
+          <input type="number" id="ov-fatigue" min="0" max="1" step="0.01" placeholder="auto">
+        </div>
+        <div>
+          <label>Gini係数</label>
+          <input type="number" id="ov-gini" min="0" max="1" step="0.001" placeholder="auto">
+        </div>
+        <div>
+          <label>急性期累積</label>
+          <input type="number" id="ov-acute" min="0" step="1" placeholder="auto">
+        </div>
+        <div>
+          <label>孤立度 (0-1)</label>
+          <input type="number" id="ov-isolation" min="0" max="1" step="0.01" placeholder="auto">
+        </div>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <label style="margin:0;font-size:12px;color:var(--text);">ドライラン（LLM不使用）</label>
+      <label class="toggle"><input type="checkbox" id="tog-dryrun" checked><span class="slider-t"></span></label>
+    </div>
+
+    <button class="btn btn-primary" id="btn-context" onclick="loadContext()">
+      📊 ABMコンテキスト取得
+    </button>
+    <button class="btn btn-secondary" id="btn-dialogue" onclick="runDialogue()" disabled>
+      💬 会話シミュレーション実行
+    </button>
+    <button class="btn btn-outline" id="btn-eval" onclick="runEval()" disabled>
+      🎯 LLM評価実行
+    </button>
+
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
+      <h2>📈 チャート設定</h2>
+      <div class="form-group">
+        <label>比較シナリオ（複数選択）</label>
+        <div id="chart-scenario-checks" style="display:flex;flex-direction:column;gap:4px;margin-top:4px;"></div>
+      </div>
+    </div>
+
+    <div id="status-bar" class="status" style="margin-top:8px;"></div>
+  </div>
+
+  <!-- ── MAIN: Charts + Dialogue ── -->
+  <div class="main">
+    <!-- ABM Context Metrics -->
+    <div class="card" id="ctx-card" style="display:none;">
+      <h3>🔍 ABMコンテキスト — <span id="ctx-title"></span></h3>
+      <div class="metric-grid" id="ctx-metrics"></div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <h3 style="margin:0;">📉 ABMメトリクス時系列</h3>
+        <button class="btn btn-outline" style="width:auto;padding:4px 12px;font-size:11px;" onclick="loadChartData()">🔄 更新</button>
+      </div>
+      <div class="chart-tabs" id="chart-tabs">
+        <div class="chart-tab active" data-key="mean_isolation" onclick="switchChart(this,'mean_isolation')">孤立度</div>
+        <div class="chart-tab" data-key="mean_fatigue" onclick="switchChart(this,'mean_fatigue')">疲労度</div>
+        <div class="chart-tab" data-key="burnout_count" onclick="switchChart(this,'burnout_count')">バーンアウト数</div>
+        <div class="chart-tab" data-key="cum_acute_events" onclick="switchChart(this,'cum_acute_events')">急性期累積</div>
+        <div class="chart-tab" data-key="gini_fatigue" onclick="switchChart(this,'gini_fatigue')">Gini係数</div>
+        <div class="chart-tab" data-key="coordination_level" onclick="switchChart(this,'coordination_level')">連携レベル</div>
+        <div class="chart-tab" data-key="total_nudge_interventions" onclick="switchChart(this,'total_nudge_interventions')">ナッジ数</div>
+      </div>
+      <div class="chart-wrap"><canvas id="main-chart"></canvas></div>
+      <div style="display:flex;align-items:center;gap:4px;margin-top:6px;">
+        <div style="width:2px;height:100%;background:var(--accent);"></div>
+        <span id="day-marker-label" style="font-size:11px;color:var(--muted);"></span>
+      </div>
+    </div>
+
+    <!-- Dialogue -->
+    <div class="card">
+      <h3>💬 多職種連携会議（退院調整カンファレンス）</h3>
+      <div id="dialogue-area">
+        <div class="empty-state">⬆ 「ABMコンテキスト取得」→「会話シミュレーション実行」をクリック</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL: Eval ── -->
+  <div class="panel">
+    <h2>🎯 LLM評価（W&B Judge）</h2>
+
+    <div class="form-group">
+      <label>評価ステップ数</label>
+      <input type="range" id="sel-steps" min="1" max="5" value="3">
+      <div class="val-display"><span id="steps-val">3</span> ステップ</div>
+    </div>
+
+    <div id="eval-summary" style="display:none;" class="summary-bar">
+      <div>
+        <div style="font-size:10px;color:var(--muted);">Faithfulness</div>
+        <div id="eval-ff" style="font-size:20px;font-weight:700;"></div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--muted);">Context Relevance</div>
+        <div id="eval-cr" style="font-size:20px;font-weight:700;"></div>
+      </div>
+      <div id="eval-dry-badge" style="margin-left:auto;"></div>
+    </div>
+
+    <div id="eval-area">
+      <div class="empty-state">「LLM評価実行」をクリックすると<br>各ステップの評価スコアが表示されます</div>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:12px;">
+      <h2>📋 シナリオ比較サマリー</h2>
+      <div id="compare-area">
+        <div class="empty-state" style="padding:20px;">チャートデータ取得後に表示</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ────────────────────────────────────────────────
+// State
+// ────────────────────────────────────────────────
+const API = '';  // same origin
+let csvData = {};
+let chartInstance = null;
+let currentMetric = 'mean_isolation';
+let currentCtx = null;
+let selectedScenarios = new Set(['A','B','C']);
+
+const METRIC_LABELS = {
+  mean_isolation: '孤立度（平均）',
+  mean_fatigue: '疲労度（平均）',
+  burnout_count: 'バーンアウト人数',
+  cum_acute_events: '急性期イベント累積',
+  gini_fatigue: '疲労Gini係数',
+  coordination_level: '連携レベル',
+  total_nudge_interventions: 'ナッジ介入数累積',
+};
+
+const SC_COLORS = {
+  A: '#ef4444', B: '#f59e0b', C: '#22c55e',
+  'C-noN2': '#3b82f6', 'C-noN3': '#a855f7', 'C-onlyL1': '#ec4899',
+};
+
+const AGENT_COLORS = { Doctor: '#3b82f6', CareManager: '#f59e0b', PlannerAI: '#a855f7' };
+
+// ────────────────────────────────────────────────
+// Init
+// ────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  // slider displays
+  const daySlider = document.getElementById('sel-day');
+  daySlider.addEventListener('input', () => {
+    document.getElementById('day-val').textContent = daySlider.value;
+    updateDayMarker();
+  });
+  document.getElementById('sel-steps').addEventListener('input', e => {
+    document.getElementById('steps-val').textContent = e.target.value;
+  });
+
+  // Check API
+  try {
+    const r = await fetch(`${API}/api/scenarios`);
+    const d = await r.json();
+    document.getElementById('api-status').textContent = '● 接続済み';
+    document.getElementById('api-status').style.color = 'var(--green)';
+
+    // Build scenario checkboxes
+    const cont = document.getElementById('chart-scenario-checks');
+    d.scenarios.forEach(sc => {
+      const lbl = document.createElement('label');
+      lbl.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = sc;
+      cb.checked = ['A','B','C'].includes(sc);
+      if (cb.checked) selectedScenarios.add(sc);
+      cb.addEventListener('change', () => {
+        if (cb.checked) selectedScenarios.add(sc);
+        else selectedScenarios.delete(sc);
+        renderChart();
+      });
+      const dot = document.createElement('span');
+      dot.style.cssText = `width:10px;height:10px;border-radius:50%;background:${SC_COLORS[sc]||'#888'};flex-shrink:0;`;
+      lbl.append(cb, dot, sc);
+      cont.appendChild(lbl);
+    });
+
+    // Set max day
+    daySlider.max = d.days || 100;
+    // Update seed dropdown
+    const seedSel = document.getElementById('sel-seed');
+    seedSel.innerHTML = '';
+    d.seeds.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s; o.textContent = `Seed ${s}`;
+      seedSel.appendChild(o);
+    });
+
+    await loadChartData();
+  } catch(e) {
+    document.getElementById('api-status').textContent = '● 接続失敗';
+    document.getElementById('api-status').style.color = 'var(--red)';
+  }
+});
+
+// ────────────────────────────────────────────────
+// Chart
+// ────────────────────────────────────────────────
+async function loadChartData() {
+  setStatus('チャートデータ読み込み中...', 'loading');
+  try {
+    const r = await fetch(`${API}/api/csv`);
+    csvData = await r.json();
+    renderChart();
+    renderCompareSummary();
+    setStatus('チャートデータ読み込み完了', '');
+  } catch(e) {
+    setStatus('チャートデータ取得失敗: ' + e.message, 'error');
+  }
+}
+
+function renderChart() {
+  const metric = currentMetric;
+  const datasets = [];
+  for (const [sc, rows] of Object.entries(csvData)) {
+    if (!selectedScenarios.has(sc)) continue;
+    datasets.push({
+      label: sc,
+      data: rows.map(r => ({ x: r.day, y: r[metric] ?? null })),
+      borderColor: SC_COLORS[sc] || '#888',
+      backgroundColor: (SC_COLORS[sc] || '#888') + '20',
+      borderWidth: 2,
+      pointRadius: 0,
+      tension: 0.3,
+      fill: false,
+    });
+  }
+
+  const ctx = document.getElementById('main-chart').getContext('2d');
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 300 },
+      plugins: {
+        legend: { labels: { color: '#8892a4', font: { size: 11 } } },
+        tooltip: { mode: 'index', intersect: false,
+          callbacks: { label: c => `${c.dataset.label}: ${c.parsed.y?.toFixed(3) ?? 'N/A'}` }
+        },
+      },
+      scales: {
+        x: { type: 'linear', title: { display: true, text: 'Day', color: '#8892a4', font: { size: 11 } },
+             ticks: { color: '#8892a4', font: { size: 10 } },
+             grid: { color: '#2d3148' } },
+        y: { title: { display: true, text: METRIC_LABELS[metric] || metric, color: '#8892a4', font: { size: 11 } },
+             ticks: { color: '#8892a4', font: { size: 10 } },
+             grid: { color: '#2d3148' } },
+      },
+      interaction: { mode: 'nearest', axis: 'x', intersect: false },
+    },
+  });
+  updateDayMarker();
+}
+
+function switchChart(el, key) {
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentMetric = key;
+  renderChart();
+}
+
+function updateDayMarker() {
+  const day = parseInt(document.getElementById('sel-day').value);
+  document.getElementById('day-marker-label').textContent =
+    `選択中: Day ${day}  （会話シミュレーションのコンテキスト基準点）`;
+}
+
+// ────────────────────────────────────────────────
+// Context
+// ────────────────────────────────────────────────
+async function loadContext() {
+  const sc = document.getElementById('sel-scenario').value;
+  const day = parseInt(document.getElementById('sel-day').value);
+  const seed = parseInt(document.getElementById('sel-seed').value);
+  setStatus('コンテキスト取得中...', 'loading');
+  setBtnState(false);
+  try {
+    const r = await fetch(`${API}/api/context?scenario=${sc}&day=${day}&seed=${seed}`);
+    if (!r.ok) throw new Error(await r.text());
+    currentCtx = await r.json();
+    renderContext(currentCtx);
+    document.getElementById('btn-dialogue').disabled = false;
+    document.getElementById('btn-eval').disabled = false;
+    setStatus(`Day ${day}・シナリオ${sc}・Seed${seed} のコンテキストを取得しました`, '');
+  } catch(e) {
+    setStatus('コンテキスト取得失敗: ' + e.message, 'error');
+  } finally {
+    setBtnState(true);
+  }
+}
+
+function renderContext(ctx) {
+  const card = document.getElementById('ctx-card');
+  card.style.display = 'block';
+  document.getElementById('ctx-title').innerHTML =
+    `<span class="sc-badge sc-${ctx.abm_scenario}">${ctx.abm_scenario}</span>  Day ${ctx.abm_day}  Seed ${ctx.abm_seed}`;
+
+  const metrics = [
+    { label: 'CM疲労度', val: ctx.cm_fatigue, fmt: v => v.toFixed(3), cls: v => v > 0.8 ? 'danger' : v > 0.6 ? 'warn' : 'good' },
+    { label: '孤立度', val: ctx.mean_isolation, fmt: v => v.toFixed(3), cls: v => v > 0.8 ? 'danger' : v > 0.6 ? 'warn' : 'good' },
+    { label: 'バーンアウト数', val: ctx.burnout_count, fmt: v => v, cls: v => v > 10 ? 'danger' : v > 5 ? 'warn' : 'good' },
+    { label: '急性期累積', val: ctx.cum_acute_events, fmt: v => v, cls: () => '' },
+    { label: 'Gini係数', val: ctx.gini_fatigue, fmt: v => v.toFixed(4), cls: v => v > 0.04 ? 'warn' : 'good' },
+    { label: '連携レベル', val: ctx.coordination_level, fmt: v => v.toFixed(3), cls: v => v < 0.35 ? 'danger' : v < 0.5 ? 'warn' : 'good' },
+    { label: 'SDHリスク', val: ctx.mean_sdh_risk, fmt: v => v.toFixed(3), cls: v => v > 0.7 ? 'danger' : 'warn' },
+    { label: 'ナッジ合計', val: ctx.total_nudge_interventions, fmt: v => v, cls: v => v > 0 ? 'good' : '' },
+  ];
+
+  document.getElementById('ctx-metrics').innerHTML = metrics.map(m => `
+    <div class="metric-card">
+      <div class="metric-label">${m.label}</div>
+      <div class="metric-value ${m.cls(m.val)}">${m.fmt(m.val)}</div>
+    </div>`).join('');
+}
+
+// ────────────────────────────────────────────────
+// Dialogue
+// ────────────────────────────────────────────────
+async function runDialogue() {
+  if (!currentCtx) { setStatus('先にコンテキストを取得してください', 'error'); return; }
+  setStatus('会話シミュレーション実行中...', 'loading');
+  setBtnState(false);
+  document.getElementById('dialogue-area').innerHTML = '<div class="empty-state"><span class="loading-spinner"></span> 生成中...</div>';
+
+  const dryRun = document.getElementById('tog-dryrun').checked;
+  const body = {
+    scenario: currentCtx.abm_scenario,
+    day: currentCtx.abm_day,
+    seed: currentCtx.abm_seed,
+    dry_run: dryRun,
+  };
+  // Apply overrides
+  const ovFatigue = document.getElementById('ov-fatigue').value;
+  const ovGini = document.getElementById('ov-gini').value;
+  const ovAcute = document.getElementById('ov-acute').value;
+  const ovIso = document.getElementById('ov-isolation').value;
+  if (ovFatigue) body.cm_fatigue = parseFloat(ovFatigue);
+  if (ovGini) body.gini_fatigue = parseFloat(ovGini);
+  if (ovAcute) body.cum_acute_events = parseInt(ovAcute);
+  if (ovIso) body.mean_isolation = parseFloat(ovIso);
+
+  try {
+    const r = await fetch(`${API}/api/dialogue`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    if (!r.ok) throw new Error(await r.text());
+    const data = await r.json();
+    renderDialogue(data);
+    setStatus(`会話シミュレーション完了（${data.turns.length}ターン、${dryRun ? 'ドライラン' : 'LIVE'}）`, '');
+  } catch(e) {
+    setStatus('会話シミュレーション失敗: ' + e.message, 'error');
+    document.getElementById('dialogue-area').innerHTML = `<div class="empty-state" style="color:var(--red)">エラー: ${e.message}</div>`;
+  } finally {
+    setBtnState(true);
+  }
+}
+
+function renderDialogue(data) {
+  const ctx = data.context;
+  const turns = data.turns;
+
+  const ctxBadge = `<span class="sc-badge sc-${ctx.abm_scenario}">${ctx.abm_scenario}</span>`;
+  let html = `<div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+    ${ctxBadge}
+    <span style="font-size:12px;color:var(--muted);">Day ${ctx.abm_day} / Seed ${ctx.abm_seed}</span>
+    <span style="font-size:12px;">CM疲労 <b style="color:${ctx.cm_fatigue > 0.8 ? 'var(--red)' : 'var(--yellow)'}">${ctx.cm_fatigue.toFixed(2)}</b></span>
+    <span style="font-size:12px;">Gini <b>${ctx.gini_fatigue.toFixed(3)}</b></span>
+    <span style="font-size:12px;">急性期累積 <b>${ctx.cum_acute_events}</b>件</span>
+    <span style="font-size:12px;">孤立度 <b>${ctx.mean_isolation.toFixed(2)}</b></span>
+    ${data.turns[0]?.dry_run ? '<span style="font-size:11px;padding:2px 6px;background:#6366f120;border-radius:4px;color:var(--accent)">DRY-RUN</span>' : ''}
+  </div>`;
+
+  turns.forEach(turn => {
+    const agentColor = AGENT_COLORS[turn.agent] || '#8892a4';
+    const dialogue = turn.spoken_dialogue || turn.proposed_intervention || '';
+    const reasoning = turn.internal_reasoning || turn.system_analysis || '';
+    const badge = turn.nudge_level > 0 ? `<span style="font-size:10px;background:#a855f720;color:var(--purple);padding:2px 6px;border-radius:4px;">L${turn.nudge_level} ${turn.applied_nudge||''}</span>` : '';
+    const ms = turn.milestone_achieved || turn.milestone_hit || '';
+    const fc = turn.fc_triggered || '';
+
+    html += `<div class="turn-card">
+      <div class="turn-header">
+        <div class="turn-num">${turn.turn}</div>
+        <div class="turn-agent" style="color:${agentColor}">${turn.agent}</div>
+        <span style="font-size:10px;color:var(--muted);margin-left:4px;">${turn.proposed_action_type || ''}</span>
+        ${badge ? `<div class="turn-badge">${badge}</div>` : ''}
+      </div>
+      <div class="turn-body">
+        ${reasoning ? `<div class="turn-reasoning">💭 ${reasoning}</div>` : ''}
+        <div class="turn-dialogue">${dialogue}</div>
+        ${fc ? `<div class="turn-fc">⚠️ ${fc}</div>` : ''}
+        ${ms ? `<div class="turn-ms">✅ ${ms}</div>` : ''}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('dialogue-area').innerHTML = html;
+}
+
+// ────────────────────────────────────────────────
+// Eval
+// ────────────────────────────────────────────────
+async function runEval() {
+  if (!currentCtx) { setStatus('先にコンテキストを取得してください', 'error'); return; }
+  setStatus('LLM評価実行中...', 'loading');
+  setBtnState(false);
+  document.getElementById('eval-area').innerHTML = '<div class="empty-state"><span class="loading-spinner"></span> 評価中...</div>';
+
+  // Use base scenario for eval (A/B/C only)
+  const sc = currentCtx.abm_scenario.replace(/-.*/, '') || 'C';
+  const validSc = ['A','B','C'].includes(sc) ? sc : 'C';
+
+  const body = {
+    scenario: validSc,
+    day: currentCtx.abm_day,
+    seed: currentCtx.abm_seed,
+    steps: parseInt(document.getElementById('sel-steps').value),
+    dry_run: document.getElementById('tog-dryrun').checked,
+  };
+
+  try {
+    const r = await fetch(`${API}/api/eval`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    if (!r.ok) throw new Error(await r.text());
+    const data = await r.json();
+    renderEval(data);
+    setStatus(`評価完了（${data.steps}ステップ、${data.dry_run ? 'ドライラン' : 'LIVE'}）`, '');
+  } catch(e) {
+    setStatus('評価失敗: ' + e.message, 'error');
+    document.getElementById('eval-area').innerHTML = `<div class="empty-state" style="color:var(--red)">エラー: ${e.message}</div>`;
+  } finally {
+    setBtnState(true);
+  }
+}
+
+function renderEval(data) {
+  const summary = data.summary;
+  // Summary bar
+  const evalSummary = document.getElementById('eval-summary');
+  evalSummary.style.display = 'flex';
+  const ffVal = summary.mean_faithfulness;
+  const crVal = summary.mean_context_relevance;
+  document.getElementById('eval-ff').textContent = ffVal.toFixed(2);
+  document.getElementById('eval-ff').style.color = ffVal > 0.75 ? 'var(--green)' : ffVal > 0.5 ? 'var(--yellow)' : 'var(--red)';
+  document.getElementById('eval-cr').textContent = crVal.toFixed(2);
+  document.getElementById('eval-cr').style.color = crVal > 0.75 ? 'var(--green)' : crVal > 0.5 ? 'var(--yellow)' : 'var(--red)';
+  document.getElementById('eval-dry-badge').innerHTML = data.dry_run ?
+    '<span style="font-size:10px;padding:2px 6px;background:#6366f120;color:var(--accent);border-radius:4px;">DRY-RUN</span>' : '';
+
+  // Records
+  let html = '';
+  data.records.forEach(rec => {
+    const ff = rec.faithfulness ?? 0.5;
+    const cr = rec.context_relevance ?? 0.5;
+    const ffCls = ff > 0.75 ? 'score-high' : ff > 0.5 ? 'score-mid' : 'score-low';
+    const crCls = cr > 0.75 ? 'score-high' : cr > 0.5 ? 'score-mid' : 'score-low';
+    html += `<div class="eval-record">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Step ${rec.step}</div>
+      <div style="font-size:12px;line-height:1.5;margin-bottom:4px;">${rec.action}</div>
+      ${rec.reasoning ? `<div style="font-size:11px;color:var(--muted);font-style:italic;">${rec.reasoning}</div>` : ''}
+      <div class="eval-scores">
+        <span class="score-pill ${ffCls}">Faithful ${ff.toFixed(2)}</span>
+        <span class="score-pill ${crCls}">Relevance ${cr.toFixed(2)}</span>
+      </div>
+    </div>`;
+  });
+  document.getElementById('eval-area').innerHTML = html;
+}
+
+// ────────────────────────────────────────────────
+// Compare Summary (right panel)
+// ────────────────────────────────────────────────
+function renderCompareSummary() {
+  const scenarios = Object.keys(csvData);
+  if (!scenarios.length) return;
+
+  const keys = ['cum_acute_events', 'mean_isolation', 'burnout_count', 'gini_fatigue'];
+  const keyLabels = { cum_acute_events: '急性期', mean_isolation: '孤立度', burnout_count: 'BO数', gini_fatigue: 'Gini' };
+
+  // Get final day values per scenario
+  let html = `<table style="width:100%;border-collapse:collapse;font-size:11px;">
+    <thead><tr style="color:var(--muted);">
+      <th style="text-align:left;padding:4px 4px 4px 0;">SC</th>
+      ${keys.map(k => `<th style="text-align:right;padding:4px 2px;">${keyLabels[k]}</th>`).join('')}
+    </tr></thead><tbody>`;
+
+  for (const sc of scenarios) {
+    const rows = csvData[sc];
+    if (!rows || !rows.length) continue;
+    const last = rows[rows.length - 1];
+    const color = SC_COLORS[sc] || '#888';
+    html += `<tr style="border-top:1px solid var(--border);">
+      <td style="padding:5px 4px 5px 0;"><span class="sc-badge" style="background:${color}20;color:${color};border-color:${color}">${sc}</span></td>
+      ${keys.map(k => {
+        const v = last[k];
+        const formatted = typeof v === 'number' ? (v < 1 ? v.toFixed(3) : Math.round(v)) : '-';
+        return `<td style="text-align:right;padding:5px 2px;font-weight:600;">${formatted}</td>`;
+      }).join('')}
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('compare-area').innerHTML = html;
+}
+
+// ────────────────────────────────────────────────
+// Utilities
+// ────────────────────────────────────────────────
+function setStatus(msg, cls) {
+  const el = document.getElementById('status-bar');
+  el.textContent = msg;
+  el.className = 'status ' + (cls || '');
+}
+
+function setBtnState(enabled) {
+  document.getElementById('btn-context').disabled = !enabled;
+}
+</script>
+</body>
+</html>

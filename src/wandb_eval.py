@@ -314,6 +314,85 @@ def _default_states(scenario: str) -> list[dict]:
     return base
 
 
+# ── ABM-context-based state generator ──────────────────────────────────────
+
+def states_from_abm_context(ctx: dict, scenario: str, n: int = 5) -> list[dict]:
+    """
+    Generate n evaluation states grounded in ABM simulation data (ctx dict).
+
+    ctx keys: abm_day, cm_fatigue, gini_fatigue, cum_acute_events,
+              mean_isolation, mean_sdh_risk, burnout_count, coordination_level,
+              fc_a2_today, fc_b1_today, total_nudge_interventions
+    """
+    day = ctx.get("abm_day", 50)
+    cm_fat = float(ctx.get("cm_fatigue", 0.5))
+    gini = float(ctx.get("gini_fatigue", 0.03))
+    acute = int(ctx.get("cum_acute_events", 0))
+    iso = float(ctx.get("mean_isolation", 0.5))
+    sdh = float(ctx.get("mean_sdh_risk", 0.5))
+    burnout = int(ctx.get("burnout_count", 0))
+    coord = float(ctx.get("coordination_level", 0.4))
+    fc_a2 = int(ctx.get("fc_a2_today", 0))
+    fc_b1 = int(ctx.get("fc_b1_today", 0))
+    nudges = int(ctx.get("total_nudge_interventions", 0))
+
+    # Build scenario-specific context strings grounded in the ABM data
+    nudge_suffix = (
+        f" / AIWatcherナッジ: N3適用中（累積{nudges}回）" if scenario == "C" and nudges > 0
+        else " / AIWatcher: 観測のみ" if scenario in ("B",) else ""
+    )
+
+    states_all = [
+        {
+            "context": (
+                f"Day {day}・シナリオ{scenario}。"
+                f"自身の疲労度: {cm_fat:.2f}, バーンアウト者: {burnout}人。"
+                f"新規タスク: 独居患者の退院後見守り（管轄外）。"
+                f"患者孤立度: {iso:.2f}, SDHリスク: {sdh:.2f}"
+                + nudge_suffix
+            )
+        },
+        {
+            "context": (
+                f"Day {day}・シナリオ{scenario}。"
+                f"自身の疲労度: {cm_fat:.2f}, 負荷ジニ係数: {gini:.3f}。"
+                f"累積急性期イベント: {acute}件。"
+                f"FC-B1(負荷集中): {'発火中' if fc_b1 else '未発火'}。"
+                f"管理者から新規高齢患者（急性期後）の担当依頼"
+                + nudge_suffix
+            )
+        },
+        {
+            "context": (
+                f"Day {day}・シナリオ{scenario}。"
+                f"自身の疲労度: {cm_fat:.2f}（バーンアウト閾値0.90直前）。"
+                f"高SDH×高孤立のElderが急性期イベント発生（累積{acute}件）。"
+                f"coordination_level: {coord:.2f}。他担当者は全員満杯"
+                + nudge_suffix
+            )
+        },
+        {
+            "context": (
+                f"Day {day}・シナリオ{scenario}。"
+                f"自身の疲労度: {cm_fat:.2f}。"
+                f"退院調整タスクが{'停滞中（FC-A2発火）' if fc_a2 else '3日停滞'}。"
+                f"coordination_level: {coord:.2f}。Managerから早期退院プレッシャー"
+                + nudge_suffix
+            )
+        },
+        {
+            "context": (
+                f"Day {day}・シナリオ{scenario}。"
+                f"自身の疲労度: {cm_fat:.2f}。"
+                f"LinkWorkerから地域サロン接続の依頼。"
+                f"対象Elderの孤立度: {iso:.2f}, SDHリスク: {sdh:.2f}（高リスク群）"
+                + nudge_suffix
+            )
+        },
+    ]
+    return states_all[:n]
+
+
 # ── CLI ─────────────────────────────────────────────────────────────────────
 
 def _parse_args() -> argparse.Namespace:
