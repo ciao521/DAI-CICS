@@ -20,7 +20,7 @@ tests/
 results/               # CSV × 8 + PNG × 6
 ```
 
-## Scenari
+## Command
 ```
 # A Only Elder
 python -m src.run_experiment --scenario A --days 100
@@ -301,6 +301,205 @@ python -m src.dialogue_sim --dry-run
 ```
 
 出力: `results/dialogue_log_{TAG}_{TIMESTAMP}.json`
+
+---
+
+## Commands
+
+これまでに確認済みの全実行コマンドを役割・実行手順とともにまとめる。
+
+---
+
+### 0. 環境セットアップ
+
+```bash
+# 依存パッケージのインストール（python-dotenv / mesa / wandb / anthropic 等）
+pip install -r requirements.txt
+
+# .env を用意（コピーして値を入力）
+cp env-templete.txt .env
+# 以下を .env に設定
+#   AWS_BEARER_TOKEN_BEDROCK=bedrock-api-key-...
+#   WANDB_API_KEY=wandb_v1_...
+#   ANTHROPIC_API_KEY=sk-ant-...  ← 任意（なければ Bedrock 経由）
+```
+
+---
+
+### 1. テスト実行
+
+```bash
+# 全 22 テストを実行（1〜2秒で完了）
+python -m pytest tests/ -q
+```
+
+**役割**: `src/` 全モジュールの単体テスト。CI で実行して回帰を検出する。
+
+---
+
+### 2. ABM シミュレーション — 単一シナリオ
+
+```bash
+# シナリオA（ホモ・エコノミカス分断モデル）100日
+python -m src.run_experiment --scenario A --days 100
+
+# シナリオB（共同体過依存・やりがい搾取）100日
+python -m src.run_experiment --scenario B --days 100
+
+# シナリオC（AI支援・社会的処方・ナッジ）100日
+python -m src.run_experiment --scenario C --days 100
+```
+
+**役割**: 1シナリオ × デフォルト3 seed を実行し、日次50列 CSV を `results/` に保存。
+
+**出力例**:
+```
+results/daily_A_d100_s3.csv
+results/summary_d100_s3.csv
+```
+
+---
+
+### 3. ABM シミュレーション — A/B/C 比較（推奨）
+
+```bash
+# A/B/C を 10 seed で実行してプロット生成
+python -m src.run_experiment --scenario all --days 100 --seeds 10 --plot
+```
+
+**役割**: 3シナリオを同条件（同 seed）で比較し、比較プロット4種を自動生成。
+
+**出力例**:
+```
+results/daily_{A,B,C}_d100_s10.csv
+results/combined_d100_s10.csv
+results/summary_d100_s10.csv
+results/comparison_main.png      # sdh_risk / isolation / fatigue / burnout
+results/comparison_extended.png  # acute / gini / coordination / M1
+results/milestones.png
+results/fc_heatmap.png
+```
+
+---
+
+### 4. ABM シミュレーション — A/B/C + アブレーション一括
+
+```bash
+# A/B/C + C-noN2 + C-noN3 + C-onlyL1 を 10 seed で一括実行
+python -m src.run_experiment --all-including-ablations --days 100 --seeds 10 --plot
+```
+
+**役割**: 研究用アブレーション実験。6条件の最終値・時系列を比較する図を生成。
+
+**出力例**:
+```
+results/daily_C-noN2_d100_s10.csv
+results/daily_C-noN3_d100_s10.csv
+results/daily_C-onlyL1_d100_s10.csv
+results/ablation_final.png        # 最終値バーチャート（4指標）
+results/ablation_timeseries.png   # 時系列比較（4パネル）
+```
+
+---
+
+### 5. ABM シミュレーション — 個別アブレーション条件
+
+```bash
+# N2（社会的処方）なし
+python -m src.run_experiment --scenario C-noN2 --days 100 --seeds 10
+
+# N3（負荷再配分）なし
+python -m src.run_experiment --scenario C-noN3 --days 100 --seeds 10
+
+# L1情報提示のみ（イベント生成・割当変更なし）
+python -m src.run_experiment --scenario C-onlyL1 --days 100 --seeds 10
+```
+
+**役割**: 特定ナッジの寄与を個別に検証する。
+
+---
+
+### 6. LLM 退院調整カンファレンス（`dialogue_sim`）
+
+```bash
+# ライブ実行（AWS Bedrock / Claude を呼び出す）
+python -m src.dialogue_sim --tag live
+
+# ドライラン（API なし・ローカルテキスト）
+python -m src.dialogue_sim --dry-run
+```
+
+**役割**: `CareManagerAgent`・`DoctorAgent`・`PlannerAIAgent` による5ターンの多職種連携会議を Claude で生成し、ナッジ（N3）の効果をテキストとして可視化する。
+
+**出力例**:
+```
+results/dialogue_log_live_20260408T101331.json   # 5ターン対話ログ
+results/dialogue_log_dryrun_20260408T095957.json # ドライラン版
+```
+
+---
+
+### 7. W&B — ABM メトリクスのストリーミング
+
+```bash
+# ABM を実行し、日次メトリクスをリアルタイムで W&B にログ（LLM なし）
+python -m src.wandb_eval --abm-only --scenario A --days 100 --seeds 3
+python -m src.wandb_eval --abm-only --scenario B --days 100 --seeds 3
+python -m src.wandb_eval --abm-only --scenario C --days 100 --seeds 3
+```
+
+**役割**: W&B ダッシュボード上で日次指標（`sdh_risk`, `fatigue`, `burnout` 等）の時系列をインタラクティブに確認できる。APIキー無効時は `wandb/offline-run-*/` にローカル保存。
+
+---
+
+### 8. W&B — LLM-as-Judge 評価
+
+```bash
+# シナリオA: 5ステップのエージェント行動 + Judge 採点
+python -m src.wandb_eval --scenario A --steps 5
+
+# シナリオB/C も同様
+python -m src.wandb_eval --scenario B --steps 5
+python -m src.wandb_eval --scenario C --steps 5
+```
+
+**役割**: シナリオ別の典型状況に対してエージェントにアクションを生成させ、別の LLM（Judge）が `faithfulness`・`context_relevance` を 0–1 で採点。スコアを W&B にログし、ローカルにも保存する。
+
+**出力例**:
+```
+results/wandb_eval_A_20260408T195912.json   # 評価ログ（step / action / scores）
+wandb/run-20260408_195844-w3e4epnk/        # W&B クラウド同期済みラン
+```
+
+W&B ダッシュボード: https://wandb.ai/yshr-i/healthcare-collaboration-sim
+
+---
+
+### 9. W&B — オフラインランのクラウド同期
+
+```bash
+# .env に正しい WANDB_API_KEY を設定後、過去のオフランをまとめて同期
+wandb sync wandb/offline-run-*/
+```
+
+**役割**: APIキーが一時的に無効だった間に蓄積したオフラインランを後からクラウドにアップロードする。
+
+---
+
+### コマンド早見表
+
+| # | コマンド | 目的 |
+|---|---|---|
+| 0 | `pip install -r requirements.txt` | 依存インストール |
+| 1 | `pytest tests/ -q` | 22テスト実行 |
+| 2 | `run_experiment --scenario A --days 100` | シナリオA単体 |
+| 3 | `run_experiment --scenario all --seeds 10 --plot` | A/B/C比較+プロット |
+| 4 | `run_experiment --all-including-ablations --seeds 10 --plot` | 6条件一括+アブレーション図 |
+| 5 | `run_experiment --scenario C-noN2/C-noN3/C-onlyL1` | 個別アブレーション |
+| 6 | `dialogue_sim --tag live` | LLMカンファレンス5ターン |
+| 7 | `wandb_eval --abm-only --scenario A` | ABM→W&Bストリーム |
+| 8 | `wandb_eval --scenario A --steps 5` | LLM Judge評価 |
+| 9 | `wandb sync wandb/offline-run-*/` | オフラインランを同期 |
 
 ---
 
