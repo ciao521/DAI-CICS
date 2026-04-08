@@ -322,6 +322,9 @@ cp env-templete.txt .env
 #   AWS_BEARER_TOKEN_BEDROCK=bedrock-api-key-...
 #   WANDB_API_KEY=wandb_v1_...
 #   ANTHROPIC_API_KEY=sk-ant-...  ← 任意（なければ Bedrock 経由）
+
+python -m src.run_experiment --scenario all --days 100 --seeds 10 --plot
+
 ```
 
 ---
