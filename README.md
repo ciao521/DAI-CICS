@@ -502,7 +502,10 @@ wandb sync wandb/offline-run-*/
 | 9 | `wandb sync wandb/offline-run-*/` | オフラインランを同期 |
 
 ```
-python -m src.run_experiment --scenario all --days 100 --seeds 5 --plot 2>&1 | tail -35
+```
+- python -m src.run_experiment --scenario all --days 100 --seeds 5 --plot 2>&1 | tail -35
+
+- uvicorn src.app:app --port 8000 &
 ```
 ---
 

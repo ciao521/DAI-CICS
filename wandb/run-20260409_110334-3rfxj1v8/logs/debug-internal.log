@@ -1,0 +1,501 @@
+2026-04-09 11:03:34,485 INFO    StreamThr :46309 [internal.py:wandb_internal():85] W&B internal server running at pid: 46309, started at: 2026-04-09 11:03:34.479409
+2026-04-09 11:03:34,488 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: status
+2026-04-09 11:03:34,490 INFO    WriterThread:46309 [datastore.py:open_for_write():87] open: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/run-3rfxj1v8.wandb
+2026-04-09 11:03:34,496 DEBUG   SenderThread:46309 [sender.py:send():378] send: header
+2026-04-09 11:03:34,523 DEBUG   SenderThread:46309 [sender.py:send():378] send: run
+2026-04-09 11:03:35,275 INFO    SenderThread:46309 [dir_watcher.py:__init__():211] watching files in: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files
+2026-04-09 11:03:35,275 INFO    SenderThread:46309 [sender.py:_start_run_threads():1123] run started: 3rfxj1v8 with start time 1775700214.474533
+2026-04-09 11:03:35,282 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: check_version
+2026-04-09 11:03:35,282 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: check_version
+2026-04-09 11:03:35,339 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: run_start
+2026-04-09 11:03:35,345 DEBUG   HandlerThread:46309 [system_info.py:__init__():26] System info init
+2026-04-09 11:03:35,345 DEBUG   HandlerThread:46309 [system_info.py:__init__():41] System info init done
+2026-04-09 11:03:35,345 INFO    HandlerThread:46309 [system_monitor.py:start():194] Starting system monitor
+2026-04-09 11:03:35,345 INFO    SystemMonitor:46309 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2026-04-09 11:03:35,345 INFO    HandlerThread:46309 [system_monitor.py:probe():214] Collecting system info
+2026-04-09 11:03:35,346 INFO    SystemMonitor:46309 [interfaces.py:start():188] Started cpu monitoring
+2026-04-09 11:03:35,346 INFO    SystemMonitor:46309 [interfaces.py:start():188] Started disk monitoring
+2026-04-09 11:03:35,350 INFO    SystemMonitor:46309 [interfaces.py:start():188] Started gpuapple monitoring
+2026-04-09 11:03:35,351 INFO    SystemMonitor:46309 [interfaces.py:start():188] Started memory monitoring
+2026-04-09 11:03:35,352 INFO    SystemMonitor:46309 [interfaces.py:start():188] Started network monitoring
+2026-04-09 11:03:35,450 ERROR   HandlerThread:46309 [gpu_apple.py:probe():176] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 164, in probe
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:03:35,453 DEBUG   HandlerThread:46309 [system_info.py:probe():150] Probing system
+2026-04-09 11:03:35,454 DEBUG   HandlerThread:46309 [system_info.py:_probe_git():135] Probing git
+2026-04-09 11:03:35,486 DEBUG   HandlerThread:46309 [system_info.py:_probe_git():143] Probing git done
+2026-04-09 11:03:35,486 DEBUG   HandlerThread:46309 [system_info.py:probe():198] Probing system done
+2026-04-09 11:03:35,486 DEBUG   HandlerThread:46309 [system_monitor.py:probe():223] {'os': 'macOS-13.2.1-arm64-arm-64bit', 'python': '3.11.3', 'heartbeatAt': '2026-04-09T02:03:35.453200', 'startedAt': '2026-04-09T02:03:34.456926', 'docker': None, 'cuda': None, 'args': ('src.app:app', '--port', '8000'), 'state': 'running', 'program': '/Users/yasuhiro/.pyenv/versions/3.11.3/bin/uvicorn', 'codePathLocal': None, 'git': {'remote': 'https://github.com/ciao521/DAI-CICS.git', 'commit': '2d7dca0f76ad27b6d9f4b6bf61887e3594bd4116'}, 'email': 'yshr.i@icloud.com', 'root': '/Users/yasuhiro/Downloads/DAI-CICS', 'host': 'yasuhironoMacBook-Air.local', 'username': 'yasuhiro', 'executable': '/Users/yasuhiro/.pyenv/versions/3.11.3/bin/python3.11', 'cpu_count': 8, 'cpu_count_logical': 8, 'disk': {'/': {'total': 228.27386474609375, 'used': 12.241790771484375}}, 'gpuapple': {'type': 'arm', 'vendor': 'Apple'}, 'memory': {'total': 8.0}}
+2026-04-09 11:03:35,486 INFO    HandlerThread:46309 [system_monitor.py:probe():224] Finished collecting system info
+2026-04-09 11:03:35,486 INFO    HandlerThread:46309 [system_monitor.py:probe():227] Publishing system info
+2026-04-09 11:03:35,487 INFO    HandlerThread:46309 [system_monitor.py:probe():229] Finished publishing system info
+2026-04-09 11:03:35,488 DEBUG   SenderThread:46309 [sender.py:send():378] send: files
+2026-04-09 11:03:35,488 INFO    SenderThread:46309 [sender.py:_save_file():1389] saving file wandb-metadata.json with policy now
+2026-04-09 11:03:35,532 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:03:35,702 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: python_packages
+2026-04-09 11:03:35,702 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: stop_status
+2026-04-09 11:03:35,702 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: python_packages
+2026-04-09 11:03:35,703 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: stop_status
+2026-04-09 11:03:35,945 DEBUG   SenderThread:46309 [sender.py:send():378] send: telemetry
+2026-04-09 11:03:36,101 INFO    wandb-upload_0:46309 [upload_job.py:push():130] Uploaded file /var/folders/4y/tgpn6bt10l91r19jlpk19n_c0000gn/T/tmpfdqkc_8jwandb/glr2lsu2-wandb-metadata.json
+2026-04-09 11:03:36,282 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:03:36,283 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/requirements.txt
+2026-04-09 11:03:36,283 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-metadata.json
+2026-04-09 11:03:37,662 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:03:38,294 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:03:39,765 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:03:39,964 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: status_report
+2026-04-09 11:03:40,700 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: partial_history
+2026-04-09 11:03:40,701 DEBUG   SenderThread:46309 [sender.py:send():378] send: history
+2026-04-09 11:03:40,701 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: summary_record
+2026-04-09 11:03:40,702 INFO    SenderThread:46309 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2026-04-09 11:03:41,308 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-summary.json
+2026-04-09 11:03:41,895 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:03:42,309 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:03:44,024 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:03:44,595 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: partial_history
+2026-04-09 11:03:44,599 DEBUG   SenderThread:46309 [sender.py:send():378] send: history
+2026-04-09 11:03:44,600 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: summary_record
+2026-04-09 11:03:44,602 INFO    SenderThread:46309 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2026-04-09 11:03:45,329 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-summary.json
+2026-04-09 11:03:45,609 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: status_report
+2026-04-09 11:03:46,159 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:03:46,331 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:03:48,251 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:03:49,412 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: partial_history
+2026-04-09 11:03:49,414 DEBUG   SenderThread:46309 [sender.py:send():378] send: history
+2026-04-09 11:03:49,414 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: summary_record
+2026-04-09 11:03:49,415 INFO    SenderThread:46309 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2026-04-09 11:03:50,345 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:03:50,354 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-summary.json
+2026-04-09 11:03:50,354 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:03:50,711 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: stop_status
+2026-04-09 11:03:50,712 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: stop_status
+2026-04-09 11:03:51,032 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: status_report
+2026-04-09 11:03:52,464 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:03:53,484 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: partial_history
+2026-04-09 11:03:53,488 DEBUG   SenderThread:46309 [sender.py:send():378] send: history
+2026-04-09 11:03:53,490 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: summary_record
+2026-04-09 11:03:53,491 INFO    SenderThread:46309 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2026-04-09 11:03:54,378 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-summary.json
+2026-04-09 11:03:54,378 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:03:54,597 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:03:56,450 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: status_report
+2026-04-09 11:03:56,723 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:03:58,401 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:03:58,848 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:03:59,756 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: partial_history
+2026-04-09 11:03:59,760 DEBUG   SenderThread:46309 [sender.py:send():378] send: history
+2026-04-09 11:03:59,760 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: summary_record
+2026-04-09 11:03:59,761 INFO    SenderThread:46309 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2026-04-09 11:04:00,409 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-summary.json
+2026-04-09 11:04:00,409 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:04:00,979 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:04:01,772 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: status_report
+2026-04-09 11:04:02,419 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:04:03,108 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:04:04,900 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: partial_history
+2026-04-09 11:04:04,903 DEBUG   SenderThread:46309 [sender.py:send():378] send: history
+2026-04-09 11:04:04,903 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: summary_record
+2026-04-09 11:04:04,905 INFO    SenderThread:46309 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2026-04-09 11:04:05,242 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:04:05,433 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-summary.json
+2026-04-09 11:04:05,724 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: stop_status
+2026-04-09 11:04:05,725 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: stop_status
+2026-04-09 11:04:06,435 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:04:06,959 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: status_report
+2026-04-09 11:04:07,368 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:04:07,437 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/config.yaml
+2026-04-09 11:04:09,484 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:04:09,906 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: partial_history
+2026-04-09 11:04:09,909 DEBUG   SenderThread:46309 [sender.py:send():378] send: history
+2026-04-09 11:04:09,909 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: summary_record
+2026-04-09 11:04:09,910 INFO    SenderThread:46309 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2026-04-09 11:04:10,450 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-summary.json
+2026-04-09 11:04:11,613 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:04:12,461 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:04:12,922 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: status_report
+2026-04-09 11:04:13,746 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:04:13,909 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: partial_history
+2026-04-09 11:04:13,910 DEBUG   SenderThread:46309 [sender.py:send():378] send: history
+2026-04-09 11:04:13,910 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: summary_record
+2026-04-09 11:04:13,911 INFO    SenderThread:46309 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2026-04-09 11:04:14,473 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-summary.json
+2026-04-09 11:04:15,877 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:04:16,485 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:04:18,007 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:04:18,493 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:04:18,781 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: status_report
+2026-04-09 11:04:19,328 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: partial_history
+2026-04-09 11:04:19,330 DEBUG   SenderThread:46309 [sender.py:send():378] send: history
+2026-04-09 11:04:19,331 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: summary_record
+2026-04-09 11:04:19,331 INFO    SenderThread:46309 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2026-04-09 11:04:19,497 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-summary.json
+2026-04-09 11:04:20,138 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:04:20,502 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:04:20,728 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: stop_status
+2026-04-09 11:04:20,729 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: stop_status
+2026-04-09 11:04:22,268 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:04:23,946 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: status_report
+2026-04-09 11:04:24,398 ERROR   gpuapple  :46309 [gpu_apple.py:sample():110] GPU stats error: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+Traceback (most recent call last):
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/sdk/internal/system/assets/gpu_apple.py", line 64, in sample
+    subprocess.check_output(command, universal_newlines=True)
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/Users/yasuhiro/.pyenv/versions/3.11.3/lib/python3.11/site-packages/wandb/bin/apple_gpu_stats', '--json']' died with <Signals.SIGTRAP: 5>.
+2026-04-09 11:04:24,729 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: partial_history
+2026-04-09 11:04:24,731 DEBUG   SenderThread:46309 [sender.py:send():378] send: history
+2026-04-09 11:04:24,731 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: summary_record
+2026-04-09 11:04:24,732 INFO    SenderThread:46309 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2026-04-09 11:04:24,733 DEBUG   SenderThread:46309 [sender.py:send():378] send: telemetry
+2026-04-09 11:04:24,733 DEBUG   SenderThread:46309 [sender.py:send():378] send: exit
+2026-04-09 11:04:24,733 INFO    SenderThread:46309 [sender.py:send_exit():585] handling exit code: 0
+2026-04-09 11:04:24,733 INFO    SenderThread:46309 [sender.py:send_exit():587] handling runtime: 49
+2026-04-09 11:04:24,733 INFO    SenderThread:46309 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2026-04-09 11:04:24,733 INFO    SenderThread:46309 [sender.py:send_exit():593] send defer
+2026-04-09 11:04:24,734 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:24,734 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 0
+2026-04-09 11:04:24,734 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:24,734 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 0
+2026-04-09 11:04:24,734 INFO    SenderThread:46309 [sender.py:transition_state():613] send defer: 1
+2026-04-09 11:04:24,734 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:24,734 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 1
+2026-04-09 11:04:24,735 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:24,735 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 1
+2026-04-09 11:04:24,735 INFO    SenderThread:46309 [sender.py:transition_state():613] send defer: 2
+2026-04-09 11:04:24,735 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:24,735 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 2
+2026-04-09 11:04:24,735 INFO    HandlerThread:46309 [system_monitor.py:finish():203] Stopping system monitor
+2026-04-09 11:04:24,735 INFO    HandlerThread:46309 [interfaces.py:finish():200] Joined cpu monitor
+2026-04-09 11:04:24,735 INFO    HandlerThread:46309 [interfaces.py:finish():200] Joined disk monitor
+2026-04-09 11:04:24,735 DEBUG   SystemMonitor:46309 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2026-04-09 11:04:24,735 INFO    HandlerThread:46309 [interfaces.py:finish():200] Joined gpuapple monitor
+2026-04-09 11:04:24,735 DEBUG   SystemMonitor:46309 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2026-04-09 11:04:24,735 INFO    HandlerThread:46309 [interfaces.py:finish():200] Joined memory monitor
+2026-04-09 11:04:24,735 DEBUG   SystemMonitor:46309 [system_monitor.py:_start():183] Publishing last batch of metrics
+2026-04-09 11:04:24,736 INFO    HandlerThread:46309 [interfaces.py:finish():200] Joined network monitor
+2026-04-09 11:04:24,736 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:24,736 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 2
+2026-04-09 11:04:24,736 INFO    SenderThread:46309 [sender.py:transition_state():613] send defer: 3
+2026-04-09 11:04:24,737 DEBUG   SenderThread:46309 [sender.py:send():378] send: telemetry
+2026-04-09 11:04:24,737 DEBUG   SenderThread:46309 [sender.py:send():378] send: stats
+2026-04-09 11:04:24,737 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:24,737 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 3
+2026-04-09 11:04:24,737 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:24,737 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 3
+2026-04-09 11:04:24,737 INFO    SenderThread:46309 [sender.py:transition_state():613] send defer: 4
+2026-04-09 11:04:24,737 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:24,737 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 4
+2026-04-09 11:04:24,737 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:24,737 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 4
+2026-04-09 11:04:24,737 INFO    SenderThread:46309 [sender.py:transition_state():613] send defer: 5
+2026-04-09 11:04:24,737 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:24,737 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 5
+2026-04-09 11:04:24,737 DEBUG   SenderThread:46309 [sender.py:send():378] send: summary
+2026-04-09 11:04:24,738 INFO    SenderThread:46309 [sender.py:_save_file():1389] saving file wandb-summary.json with policy end
+2026-04-09 11:04:24,738 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:24,738 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 5
+2026-04-09 11:04:24,738 INFO    SenderThread:46309 [sender.py:transition_state():613] send defer: 6
+2026-04-09 11:04:24,738 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:24,738 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 6
+2026-04-09 11:04:24,738 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:24,738 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 6
+2026-04-09 11:04:24,740 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: status_report
+2026-04-09 11:04:25,374 INFO    SenderThread:46309 [sender.py:transition_state():613] send defer: 7
+2026-04-09 11:04:25,375 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:25,375 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 7
+2026-04-09 11:04:25,375 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:25,375 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 7
+2026-04-09 11:04:25,528 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/config.yaml
+2026-04-09 11:04:25,528 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-summary.json
+2026-04-09 11:04:25,738 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: poll_exit
+2026-04-09 11:04:26,118 INFO    SenderThread:46309 [sender.py:transition_state():613] send defer: 8
+2026-04-09 11:04:26,119 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: poll_exit
+2026-04-09 11:04:26,119 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:26,119 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 8
+2026-04-09 11:04:26,120 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:26,120 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 8
+2026-04-09 11:04:26,120 INFO    SenderThread:46309 [job_builder.py:build():432] Attempting to build job artifact
+2026-04-09 11:04:26,122 INFO    SenderThread:46309 [job_builder.py:_get_source_type():565] is repo sourced job
+2026-04-09 11:04:26,122 WARNING SenderThread:46309 [job_builder.py:_log_if_verbose():267] No program path found, not creating job artifact. See https://docs.wandb.ai/guides/launch/create-job
+2026-04-09 11:04:26,122 INFO    SenderThread:46309 [sender.py:transition_state():613] send defer: 9
+2026-04-09 11:04:26,122 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:26,122 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 9
+2026-04-09 11:04:26,122 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:26,122 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 9
+2026-04-09 11:04:26,122 INFO    SenderThread:46309 [dir_watcher.py:finish():358] shutting down directory watcher
+2026-04-09 11:04:26,529 INFO    Thread-24 :46309 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:04:26,531 INFO    SenderThread:46309 [dir_watcher.py:finish():388] scan: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files
+2026-04-09 11:04:26,531 INFO    SenderThread:46309 [dir_watcher.py:finish():402] scan save: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/requirements.txt requirements.txt
+2026-04-09 11:04:26,531 INFO    SenderThread:46309 [dir_watcher.py:finish():402] scan save: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log output.log
+2026-04-09 11:04:26,535 INFO    SenderThread:46309 [dir_watcher.py:finish():402] scan save: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/config.yaml config.yaml
+2026-04-09 11:04:26,538 INFO    SenderThread:46309 [dir_watcher.py:finish():402] scan save: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-summary.json wandb-summary.json
+2026-04-09 11:04:26,541 INFO    SenderThread:46309 [dir_watcher.py:finish():402] scan save: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-metadata.json wandb-metadata.json
+2026-04-09 11:04:26,542 INFO    SenderThread:46309 [sender.py:transition_state():613] send defer: 10
+2026-04-09 11:04:26,544 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:26,544 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 10
+2026-04-09 11:04:26,544 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:26,544 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 10
+2026-04-09 11:04:26,544 INFO    SenderThread:46309 [file_pusher.py:finish():169] shutting down file pusher
+2026-04-09 11:04:26,743 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: poll_exit
+2026-04-09 11:04:26,743 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: poll_exit
+2026-04-09 11:04:27,005 INFO    wandb-upload_1:46309 [upload_job.py:push():130] Uploaded file /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/output.log
+2026-04-09 11:04:27,006 INFO    wandb-upload_0:46309 [upload_job.py:push():130] Uploaded file /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/requirements.txt
+2026-04-09 11:04:27,019 INFO    wandb-upload_3:46309 [upload_job.py:push():130] Uploaded file /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/wandb-summary.json
+2026-04-09 11:04:27,019 INFO    wandb-upload_2:46309 [upload_job.py:push():130] Uploaded file /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/files/config.yaml
+2026-04-09 11:04:27,224 INFO    Thread-23 (_thread_body):46309 [sender.py:transition_state():613] send defer: 11
+2026-04-09 11:04:27,225 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:27,225 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 11
+2026-04-09 11:04:27,226 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:27,226 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 11
+2026-04-09 11:04:27,226 INFO    SenderThread:46309 [file_pusher.py:join():175] waiting for file pusher
+2026-04-09 11:04:27,228 INFO    SenderThread:46309 [sender.py:transition_state():613] send defer: 12
+2026-04-09 11:04:27,228 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:27,228 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 12
+2026-04-09 11:04:27,228 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:27,228 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 12
+2026-04-09 11:04:27,228 INFO    SenderThread:46309 [file_stream.py:finish():601] file stream finish called
+2026-04-09 11:04:27,610 INFO    SenderThread:46309 [file_stream.py:finish():605] file stream finish is done
+2026-04-09 11:04:27,611 INFO    SenderThread:46309 [sender.py:transition_state():613] send defer: 13
+2026-04-09 11:04:27,611 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:27,612 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 13
+2026-04-09 11:04:27,612 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:27,612 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 13
+2026-04-09 11:04:27,612 INFO    SenderThread:46309 [sender.py:transition_state():613] send defer: 14
+2026-04-09 11:04:27,613 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: defer
+2026-04-09 11:04:27,613 DEBUG   SenderThread:46309 [sender.py:send():378] send: final
+2026-04-09 11:04:27,613 INFO    HandlerThread:46309 [handler.py:handle_request_defer():184] handle defer: 14
+2026-04-09 11:04:27,614 DEBUG   SenderThread:46309 [sender.py:send():378] send: footer
+2026-04-09 11:04:27,614 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: defer
+2026-04-09 11:04:27,614 INFO    SenderThread:46309 [sender.py:send_request_defer():609] handle sender defer: 14
+2026-04-09 11:04:27,616 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: poll_exit
+2026-04-09 11:04:27,617 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: poll_exit
+2026-04-09 11:04:27,619 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: internal_messages
+2026-04-09 11:04:27,621 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: server_info
+2026-04-09 11:04:27,621 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: get_summary
+2026-04-09 11:04:27,621 DEBUG   SenderThread:46309 [sender.py:send_request():405] send_request: server_info
+2026-04-09 11:04:27,622 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: sampled_history
+2026-04-09 11:04:27,778 DEBUG   HandlerThread:46309 [handler.py:handle_request():158] handle_request: shutdown
+2026-04-09 11:04:27,778 INFO    HandlerThread:46309 [handler.py:finish():882] shutting down handler
+2026-04-09 11:04:28,626 INFO    WriterThread:46309 [datastore.py:close():296] close: /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_110334-3rfxj1v8/run-3rfxj1v8.wandb
+2026-04-09 11:04:28,775 INFO    SenderThread:46309 [sender.py:finish():1545] shutting down sender
+2026-04-09 11:04:28,775 INFO    SenderThread:46309 [file_pusher.py:finish():169] shutting down file pusher
+2026-04-09 11:04:28,775 INFO    SenderThread:46309 [file_pusher.py:join():175] waiting for file pusher

@@ -1,0 +1,36 @@
+2026-04-09 01:23:33,632 INFO    Thread-1 (worker):94385 [wandb_setup.py:_flush():76] Current SDK version is 0.17.0
+2026-04-09 01:23:33,632 INFO    Thread-1 (worker):94385 [wandb_setup.py:_flush():76] Configure stats pid to 94385
+2026-04-09 01:23:33,632 INFO    Thread-1 (worker):94385 [wandb_setup.py:_flush():76] Loading settings from /Users/yasuhiro/.config/wandb/settings
+2026-04-09 01:23:33,632 INFO    Thread-1 (worker):94385 [wandb_setup.py:_flush():76] Loading settings from /Users/yasuhiro/Downloads/DAI-CICS/wandb/settings
+2026-04-09 01:23:33,633 INFO    Thread-1 (worker):94385 [wandb_setup.py:_flush():76] Loading settings from environment variables: {'api_key': '***REDACTED***'}
+2026-04-09 01:23:33,633 INFO    Thread-1 (worker):94385 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2026-04-09 01:23:33,633 WARNING Thread-1 (worker):94385 [wandb_setup.py:_flush():76] Could not save program above cwd: /Users/yasuhiro/.pyenv/versions/3.11.3/bin/uvicorn
+2026-04-09 01:23:33,633 INFO    Thread-1 (worker):94385 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': None, 'program_abspath': '/Users/yasuhiro/.pyenv/versions/3.11.3/bin/uvicorn', 'program': '/Users/yasuhiro/.pyenv/versions/3.11.3/bin/uvicorn'}
+2026-04-09 01:23:33,633 INFO    Thread-1 (worker):94385 [wandb_setup.py:_flush():76] Applying login settings: {}
+2026-04-09 01:23:33,633 INFO    Thread-1 (worker):94385 [wandb_init.py:_log_setup():520] Logging user logs to /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_012333-t8mkuj3e/logs/debug.log
+2026-04-09 01:23:33,633 INFO    Thread-1 (worker):94385 [wandb_init.py:_log_setup():521] Logging internal logs to /Users/yasuhiro/Downloads/DAI-CICS/wandb/run-20260409_012333-t8mkuj3e/logs/debug-internal.log
+2026-04-09 01:23:33,633 INFO    Thread-1 (worker):94385 [wandb_init.py:init():560] calling init triggers
+2026-04-09 01:23:33,633 INFO    Thread-1 (worker):94385 [wandb_init.py:init():567] wandb.init called with sweep_config: {}
+config: {'scenario': 'C_AI_Assisted', 'model': 'claude-3-opus-20240229', 'bedrock_model': 'us.anthropic.claude-opus-4-6-v1', 'framework': 'DAI-CICS ABM Mesa 3.x', 'judge': 'LLM-as-Judge (faithfulness + context_relevance)'}
+2026-04-09 01:23:33,633 INFO    Thread-1 (worker):94385 [wandb_init.py:init():610] starting backend
+2026-04-09 01:23:33,633 INFO    Thread-1 (worker):94385 [wandb_init.py:init():614] setting up manager
+2026-04-09 01:23:33,641 INFO    Thread-1 (worker):94385 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=spawn,fork,forkserver, using: spawn
+2026-04-09 01:23:33,644 INFO    Thread-1 (worker):94385 [wandb_init.py:init():622] backend started and connected
+2026-04-09 01:23:33,653 INFO    Thread-1 (worker):94385 [wandb_init.py:init():711] updated telemetry
+2026-04-09 01:23:33,680 INFO    Thread-1 (worker):94385 [wandb_init.py:init():744] communicating run to backend with 90.0 second timeout
+2026-04-09 01:23:34,372 INFO    Thread-1 (worker):94385 [wandb_run.py:_on_init():2396] communicating current version
+2026-04-09 01:23:34,431 INFO    Thread-1 (worker):94385 [wandb_run.py:_on_init():2405] got version response upgrade_message: "wandb version 0.25.1 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2026-04-09 01:23:34,431 INFO    Thread-1 (worker):94385 [wandb_init.py:init():795] starting run threads in backend
+2026-04-09 01:23:34,777 INFO    Thread-1 (worker):94385 [wandb_run.py:_console_start():2374] atexit reg
+2026-04-09 01:23:34,777 INFO    Thread-1 (worker):94385 [wandb_run.py:_redirect():2229] redirect: wrap_raw
+2026-04-09 01:23:34,777 INFO    Thread-1 (worker):94385 [wandb_run.py:_redirect():2294] Wrapping output streams.
+2026-04-09 01:23:34,777 INFO    Thread-1 (worker):94385 [wandb_run.py:_redirect():2319] Redirects installed.
+2026-04-09 01:23:34,778 INFO    Thread-1 (worker):94385 [wandb_init.py:init():838] run started, returning control to user process
+2026-04-09 01:24:22,497 INFO    Thread-1 (worker):94385 [wandb_run.py:_finish():2103] finishing run yshr-i/healthcare-collaboration-sim/t8mkuj3e
+2026-04-09 01:24:22,498 INFO    Thread-1 (worker):94385 [wandb_run.py:_atexit_cleanup():2343] got exitcode: 0
+2026-04-09 01:24:22,498 INFO    Thread-1 (worker):94385 [wandb_run.py:_restore():2326] restore
+2026-04-09 01:24:22,499 INFO    Thread-1 (worker):94385 [wandb_run.py:_restore():2332] restore done
+2026-04-09 01:24:26,331 INFO    Thread-1 (worker):94385 [wandb_run.py:_footer_history_summary_info():3994] rendering history
+2026-04-09 01:24:26,332 INFO    Thread-1 (worker):94385 [wandb_run.py:_footer_history_summary_info():4026] rendering summary
+2026-04-09 01:24:26,342 INFO    Thread-1 (worker):94385 [wandb_run.py:_footer_sync_info():3953] logging synced files

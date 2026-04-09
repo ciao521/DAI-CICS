@@ -1,0 +1,40 @@
+{
+    "os": "macOS-13.2.1-arm64-arm-64bit",
+    "python": "3.11.3",
+    "heartbeatAt": "2026-04-08T16:10:12.571530",
+    "startedAt": "2026-04-08T16:10:11.554634",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "src.app:app",
+        "--port",
+        "8000"
+    ],
+    "state": "running",
+    "program": "/Users/yasuhiro/.pyenv/versions/3.11.3/bin/uvicorn",
+    "codePathLocal": null,
+    "git": {
+        "remote": "https://github.com/ciao521/DAI-CICS.git",
+        "commit": "2d7dca0f76ad27b6d9f4b6bf61887e3594bd4116"
+    },
+    "email": "yshr.i@icloud.com",
+    "root": "/Users/yasuhiro/Downloads/DAI-CICS",
+    "host": "yasuhironoMacBook-Air.local",
+    "username": "yasuhiro",
+    "executable": "/Users/yasuhiro/.pyenv/versions/3.11.3/bin/python3.11",
+    "cpu_count": 8,
+    "cpu_count_logical": 8,
+    "disk": {
+        "/": {
+            "total": 228.27386474609375,
+            "used": 12.241790771484375
+        }
+    },
+    "gpuapple": {
+        "type": "arm",
+        "vendor": "Apple"
+    },
+    "memory": {
+        "total": 8.0
+    }
+}

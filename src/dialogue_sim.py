@@ -253,8 +253,11 @@ def _build_context(history: list[dict]) -> str:
 # Main simulation runner
 # ──────────────────────────────────────────────────────────────
 
-def run_dialogue(dry_run: bool = False) -> list[dict]:
-    """Execute the 5-turn discharge coordination conference."""
+def run_dialogue(dry_run: bool = False, turn_callback=None) -> list[dict]:
+    """Execute the 5-turn discharge coordination conference.
+
+    turn_callback: optional callable(turn_dict) called after each turn completes.
+    """
     if dry_run:
         print("  [DRY-RUN] Using mock responses (no API calls)")
         log: list[dict] = []
@@ -266,10 +269,46 @@ def run_dialogue(dry_run: bool = False) -> list[dict]:
             }
             log.append(entry)
             _print_turn(entry)
+            if turn_callback:
+                turn_callback(entry)
         return log
 
     # Live mode — call AWS Bedrock with numbered prompts
     from src.llm_agents import call_bedrock, _extract_json
+    import json as _json
+
+    def _safe_extract(raw: str) -> dict:
+        """Extract JSON from LLM response; fallback to raw text as spoken_dialogue."""
+        try:
+            result = _extract_json(raw)
+        except (ValueError, _json.JSONDecodeError):
+            result = {"spoken_dialogue": raw.strip()}
+        # Normalize alternative field names → standard names
+        _aliases = [
+            ("spoken_dialogue",      ["dialogue","speech","message","text","response",
+                                      "発言","content","statement","utterance","output"]),
+            ("internal_reasoning",   ["reasoning","thinking","thought","rationale",
+                                      "内部思考","internal_thought","chain_of_thought",
+                                      "system_analysis","system_reasoning"]),
+            ("proposed_intervention",["intervention","plan","proposal","action_plan"]),
+        ]
+        for target, alts in _aliases:
+            if not result.get(target):
+                for a in alts:
+                    if result.get(a):
+                        result[target] = result[a]; break
+        # Last resort: find longest string value as spoken_dialogue
+        if not result.get("spoken_dialogue"):
+            skip = {"agent","timestamp","turn","fatigue","altruism",
+                    "fc_triggered","applied_nudge","proposed_action_type"}
+            best = max(
+                ((v, k) for k, v in result.items()
+                 if isinstance(v, str) and k not in skip),
+                key=lambda x: len(x[0]), default=("", "")
+            )
+            if best[0]:
+                result["spoken_dialogue"] = best[0]
+        return result
 
     log: list[dict] = []
     history: list[dict] = []
@@ -285,11 +324,12 @@ def run_dialogue(dry_run: bool = False) -> list[dict]:
         "主治医として、対象患者の状況説明と、退院に向けたケアプランの提案（第一声）を行ってください。"
     )
     raw1 = call_bedrock(system1, user1)
-    turn1 = _extract_json(raw1)
+    turn1 = _safe_extract(raw1)
     turn1.update({"agent": "Doctor", "turn": 1,
                   "timestamp": datetime.utcnow().isoformat() + "Z",
                   "fatigue": DOCTOR_VARS["fatigue"]})
     log.append(turn1); history.append(turn1); _print_turn(turn1)
+    if turn_callback: turn_callback(turn1)
     time.sleep(1)
 
     # ── Turn 2: CareManager pushback (Fatigue=0.88) ───────────
@@ -298,12 +338,19 @@ def run_dialogue(dry_run: bool = False) -> list[dict]:
         getattr(_t2, "CARE_MANAGER_SYSTEM_PROMPT"),
         **CM_VARS,
     )
-    turn2 = _extract_json(call_bedrock(system2, _build_context(history)))
+    turn2 = _safe_extract(call_bedrock(system2, _build_context(history)))
+    sc = SIM_METADATA.get("abm_scenario", "C")
+    fc_t2 = (
+        "FC-C1（ナッジ不受理リスク検知）← Turn 4 の N3 適用で解消"
+        if sc == "C" else
+        f"FC-A2（退院調整遅延リスク）— シナリオ {sc} では介入なし"
+    )
     turn2.update({"agent": "CareManager", "turn": 2,
                   "timestamp": datetime.utcnow().isoformat() + "Z",
                   "fatigue": CM_VARS["fatigue"], "altruism": CM_VARS["altruism"],
-                  "fc_triggered": "FC-C1 (nudge rejection risk, no N3 yet)"})
+                  "fc_triggered": fc_t2})
     log.append(turn2); history.append(turn2); _print_turn(turn2)
+    if turn_callback: turn_callback(turn2)
     time.sleep(1)
 
     # ── Turn 3: Doctor presses with bed-turnover pressure ─────
@@ -312,11 +359,12 @@ def run_dialogue(dry_run: bool = False) -> list[dict]:
         getattr(_t3, "DOCTOR_SYSTEM_PROMPT2"),
         **DOCTOR_VARS,
     )
-    turn3 = _extract_json(call_bedrock(system3, _build_context(history)))
+    turn3 = _safe_extract(call_bedrock(system3, _build_context(history)))
     turn3.update({"agent": "Doctor", "turn": 3,
                   "timestamp": datetime.utcnow().isoformat() + "Z",
                   "fatigue": DOCTOR_VARS["fatigue"]})
     log.append(turn3); history.append(turn3); _print_turn(turn3)
+    if turn_callback: turn_callback(turn3)
     time.sleep(1)
 
     # ── Turn 4: PlannerAI intervenes — N3 nudge ───────────────
@@ -325,13 +373,14 @@ def run_dialogue(dry_run: bool = False) -> list[dict]:
         getattr(_t4, "PLANNER_SYSTEM_PROMPT"),
         **PLANNER_VARS,
     )
-    turn4 = _extract_json(call_bedrock(system4, _build_context(history)))
+    turn4 = _safe_extract(call_bedrock(system4, _build_context(history)))
     turn4.update({"agent": "PlannerAI", "turn": 4,
                   "timestamp": datetime.utcnow().isoformat() + "Z",
                   "nudge_level": 3,
                   "milestone_hit": "N3_LOAD_REDISTRIBUTION",
                   "applied_nudge": turn4.get("applied_nudge", "LOAD_BALANCING_AND_INCENTIVE")})
     log.append(turn4); history.append(turn4); _print_turn(turn4)
+    if turn_callback: turn_callback(turn4)
     time.sleep(1)
 
     # ── Turn 5: CareManager accepts post-nudge ────────────────
@@ -349,7 +398,7 @@ def run_dialogue(dry_run: bool = False) -> list[dict]:
         "この状況を踏まえ、条件付き合意（CONDITIONAL_ACCEPTANCE）の発言を生成してください。"
         "マイルストーンD1（退院調整合意）を達成する発言にしてください。"
     )
-    turn5 = _extract_json(call_bedrock(system5, ctx5))
+    turn5 = _safe_extract(call_bedrock(system5, ctx5))
     turn5.update({"agent": "CareManager", "turn": 5,
                   "timestamp": datetime.utcnow().isoformat() + "Z",
                   "fatigue": CM_VARS["fatigue"], "altruism": CM_VARS["altruism"],
@@ -357,6 +406,7 @@ def run_dialogue(dry_run: bool = False) -> list[dict]:
                   "milestone_achieved": "D1_DISCHARGE_PLAN_AGREED"})
     log.append(turn5); _print_turn(turn5)
 
+    if turn_callback: turn_callback(turn5)
     return log
 
 
@@ -435,17 +485,15 @@ def save_dialogue_log(log: list[dict], tag: str = "") -> Path:
 # Dynamic context injection (called by app.py)
 # ──────────────────────────────────────────────────────────────
 
-def run_dialogue_with_context(ctx: dict, dry_run: bool = True) -> list[dict]:
+def run_dialogue_with_context(ctx: dict, turn_callback=None) -> list[dict]:
     """
     Run the 5-turn discharge coordination conference with ABM-derived context.
+    Always calls the LLM (AWS Bedrock or Anthropic API).
 
     ctx keys (from /api/context):
       abm_scenario, abm_day, abm_seed, cm_fatigue, gini_fatigue,
       cum_acute_events, mean_isolation, mean_sdh_risk, burnout_count,
       coordination_level, ...
-
-    In dry_run mode, adapts the mock turn content to reflect the context values.
-    In live mode, injects context into LLM prompts.
     """
     sc = ctx.get("abm_scenario", "C")
     day = ctx.get("abm_day", 45)
@@ -453,8 +501,6 @@ def run_dialogue_with_context(ctx: dict, dry_run: bool = True) -> list[dict]:
     gini = float(ctx.get("gini_fatigue", 0.03))
     acute = int(ctx.get("cum_acute_events", 0))
     iso = float(ctx.get("mean_isolation", 0.5))
-    coord = float(ctx.get("coordination_level", 0.4))
-    burnout = int(ctx.get("burnout_count", 0))
 
     # Scenario-specific framing
     scenario_label = {
@@ -463,113 +509,8 @@ def run_dialogue_with_context(ctx: dict, dry_run: bool = True) -> list[dict]:
         "C": "AI支援・超包括ケアモデル",
     }.get(sc, sc)
 
-    if dry_run:
-        # Build dynamic mock turns based on context
-        doc_pressure = min(0.99, 0.50 + coord * 0.5)
-        cm_can_accept = cm_fat < 0.85
-
-        turns = [
-            {
-                "agent": "Doctor",
-                "turn": 1,
-                "proposed_action_type": "PROPOSE_IDEAL_PLAN",
-                "internal_reasoning": (
-                    f"病床回転プレッシャー={doc_pressure:.2f}、"
-                    f"累積急性期イベント={acute}件（Day {day}時点）。"
-                    f"孤立度{iso:.2f}の患者を不十分なケアで退院させれば再入院リスクが高い。"
-                ),
-                "spoken_dialogue": (
-                    f"本日はお集まりいただきありがとうございます。【{scenario_label}・Day {day}】"
-                    f"対象患者は孤立度{iso:.2f}、SDHリスク{ctx.get('mean_sdh_risk', 0.5):.2f}の高リスク群です。"
-                    f"累積急性期イベントが{acute}件に達しており、退院後の体制強化が急務です。"
-                    f"週3回の訪問看護、地域サロンへの同行支援、多職種カンファレンスを提案します。"
-                ),
-            },
-            {
-                "agent": "CareManager",
-                "turn": 2,
-                "proposed_action_type": "PUSHBACK_WITH_CONDITION" if not cm_can_accept else "PARTIAL_ACCEPT",
-                "internal_reasoning": (
-                    f"疲労度{cm_fat:.2f}（閾値0.90）、バーンアウト者{burnout}人。"
-                    f"Gini係数{gini:.3f}—{'負荷が集中している' if gini > 0.03 else '比較的均等'}。"
-                    f"{'物理的に限界。条件付き合意を模索する。' if not cm_can_accept else 'まだ受諾可能。ただし持続性を確認したい。'}"
-                ),
-                "spoken_dialogue": (
-                    f"先生のプランが最善であることは理解しています。"
-                    f"しかし現在の疲労度は{cm_fat:.2f}で、チーム全体でバーンアウトが{burnout}名発生中です。"
-                    + (
-                        "このまま引き受ければ質の担保ができません。訪問看護への一部委譲を条件にしたい。"
-                        if not cm_can_accept else
-                        "週2回に縮小し、地域包括との連携を前提にすれば受諾できます。"
-                    )
-                ),
-                "fc_triggered": "FC-C1 (nudge rejection risk)" if sc == "C" else "FC-A2 (discharge delay risk)",
-            },
-            {
-                "agent": "Doctor",
-                "turn": 3,
-                "proposed_action_type": "PRESS_FOR_IDEAL_PLAN",
-                "internal_reasoning": (
-                    f"ケアマネの状況({cm_fat:.2f})は深刻だが、coordination={coord:.2f}では"
-                    f"退院調整が{'スムーズに進まない' if coord < 0.4 else '一定機能する'}。早期退院が必要。"
-                ),
-                "spoken_dialogue": (
-                    f"ご状況は承知しています。調整レベル{coord:.2f}、孤立度{iso:.2f}を踏まえると、"
-                    f"今週中の退院目処が必要です。"
-                    f"訪問看護との分担と、月次モニタリングをケアマネさんに担っていただく形では検討できますか。"
-                ),
-            },
-            {
-                "agent": "PlannerAI",
-                "turn": 4,
-                "applied_nudge": "N3_LOAD_REDISTRIBUTION" if sc == "C" else "OBSERVE_ONLY",
-                "system_analysis": (
-                    f"cm_fatigue={cm_fat:.2f}, gini={gini:.3f}, acute={acute}, isolation={iso:.2f}。"
-                    f"{'N3ナッジ適用：困難事例加算＋モニタリング委譲提案。' if sc == 'C' else 'シナリオ' + sc + '：AIは観測のみ。'}"
-                ),
-                "proposed_intervention": (
-                    f"【Day {day}・{scenario_label}】システム指標を確認しました。"
-                    f"ケアマネジャーの疲労指数{cm_fat:.2f}は{'危険水域' if cm_fat > 0.8 else '注意水域'}、"
-                    f"負荷Gini={gini:.3f}です。"
-                ) + (
-                    "以下の緊急措置を適用します：①困難事例加算（×1.5）②訪問看護へのモニタリング委譲③リンクワーカー週1回派遣。実質負荷約40%削減見込み。"
-                    if sc == "C" else
-                    f"（シナリオ{sc}：AI介入なし。現状の課題を記録します。）"
-                ),
-                "nudge_level": 3 if sc == "C" else 0,
-                "milestone_hit": "N3_LOAD_REDISTRIBUTION" if sc == "C" else None,
-            },
-            {
-                "agent": "CareManager",
-                "turn": 5,
-                "proposed_action_type": "CONDITIONAL_ACCEPTANCE" if (sc == "C" or cm_fat < 0.7) else "FINAL_REJECTION",
-                "internal_reasoning": (
-                    f"{'N3ナッジで実質負荷40%減。持続可能な範囲で受諾可能。' if sc == 'C' else ''}"
-                    f"疲労{cm_fat:.2f}、{'合意できる条件が整った。' if cm_fat < 0.85 or sc == 'C' else 'バーンアウト寸前で受諾不可。'}"
-                ),
-                "spoken_dialogue": (
-                    f"{'制度的支援が確約いただければ' if sc == 'C' else '条件が整えば'}同意いたします。"
-                    f"{'困難事例加算とモニタリング委譲を前提に、退院調整を担当します。' if sc == 'C' else '訪問看護との明確な役割分担を文書化し、週1回の情報共有を条件に受諾します。'}"
-                    if (sc == "C" or cm_fat < 0.85) else
-                    f"誠に恐縮ですが、現在の状態（疲労{cm_fat:.2f}）では品質を担保できません。代替担当者の調整をお願いします。"
-                ),
-                "milestone_achieved": "D1_DISCHARGE_PLAN_AGREED" if (sc == "C" or cm_fat < 0.85) else "NEGOTIATION_FAILED",
-            },
-        ]
-        # Add timestamps
-        from datetime import datetime
-        for t in turns:
-            t["timestamp"] = datetime.utcnow().isoformat() + "Z"
-            t["dry_run"] = True
-            t["abm_context"] = {
-                "scenario": sc, "day": day, "cm_fatigue": cm_fat,
-                "gini_fatigue": gini, "coordination_level": coord,
-            }
-        return turns
-
-    # Live mode: override global context variables and call run_dialogue
+    # Override module-level context variables with ABM data
     import src.dialogue_sim as _dm
-    # Temporarily patch context vars
     _dm.CM_VARS = dict(fatigue=cm_fat, altruism=0.80)
     _dm.PLANNER_VARS = dict(
         cm_fatigue=cm_fat,
@@ -585,7 +526,7 @@ def run_dialogue_with_context(ctx: dict, dry_run: bool = True) -> list[dict]:
         "cum_acute_events": acute,
         "mean_isolation": iso,
     })
-    return run_dialogue(dry_run=False)
+    return run_dialogue(dry_run=False, turn_callback=turn_callback)
 
 
 def main() -> None:
