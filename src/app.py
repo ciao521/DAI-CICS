@@ -8,7 +8,7 @@ Endpoints:
   POST /api/run       → NDJSON stream: dialogue (LLM) + W&B eval (LLM)
 
 Run:
-    uvicorn src.app:app --reload --port 8000
+    open http://127.0.0.1:8000 && uvicorn src.app:app --port 8000
 """
 from __future__ import annotations
 
