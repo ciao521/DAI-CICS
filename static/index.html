@@ -1,607 +1,126 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DAI-CICS シミュレーションデモ</title>
-<style>
-:root {
-  --accent:  #2563eb; --accent2: #7c3aed;
-  --ok:      #16a34a; --warn:    #d97706; --danger: #dc2626;
-  --border:  #e2e8f0; --bg:      #f1f5f9; --panel:  #ffffff;
-  --text:    #1e293b; --muted:   #64748b;
-  --font: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; font-family: var(--font); font-size: 20px;
-  color: var(--text); background: var(--bg); overflow: hidden; }
-#app { display: flex; flex-direction: column; height: 100%; }
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAI-CICS Simulation Demo</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        DAI-CICS simulation demo<span>Network ABM × LLM Conference</span>
+      </header>
+      <div class="layout">
+        <!-- ─── Sidebar ────────────────────────────── -->
+        <aside class="sidebar">
 
-/* ── Header ─────────────────────────────────────── */
-header {
-  flex: 0 0 44px; background: var(--accent); color: #fff;
-  display: flex; align-items: center; gap: 10px; padding: 0 16px;
-  font-weight: 700; font-size: 20px; box-shadow: 0 1px 6px rgba(0,0,0,.2); flex-shrink: 0;
-}
-header span { font-size: 20px; font-weight: 400; opacity: .75; }
+          <div class="sb-sec">
+            <div class="sb-title">Experiment Condition <br> (実験条件)</div>
+            <div>
+              <label>Scenario（シナリオ）</label>
+              <select id="selScenario">
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C" selected>C</option>
+                <option value="C-noN2">C-noN2</option>
+                <option value="C-noN3">C-noN3</option>
+                <option value="C-onlyL1">C-onlyL1</option>
+              </select>
+            </div>
+            <div id="scDesc" class="sc-desc"></div>
+            <div>
+              <label>Day <b id="dayLbl" style="color:var(--accent)">45</b></label>
+              <div class="range-wrap">
+                <input type="range" id="slDay" min="1" max="100" value="45">
+                <span class="rv" id="dayNum">45</span>
+              </div>
+            </div>
+          </div>
 
-/* ── Layout ─────────────────────────────────────── */
-.layout { flex: 1 1 0; min-height: 0; display: flex; }
-.sidebar {
-  flex: 0 0 260px; min-height: 0; background: var(--panel);
-  border-right: 1px solid var(--border); overflow-y: auto;
-  display: flex; flex-direction: column;
-}
-.main {
-  flex: 1 1 0; min-height: 0; min-width: 0; overflow-y: auto;
-  padding: 12px 16px; display: flex; flex-direction: column; gap: 10px;
-}
+          <div class="sb-sec">
+            <div class="sb-title">
+              Override Parameters
+              <span style="font-size:.6rem;color:#94a3b8">（空欄の場合は、デフォルトの値で実行されます）</span>
+            </div>
+            <div class="grid2">
+              <div>
+                <label>CM疲労度</label>
+                <input type="number" id="ovFat" placeholder="0.0 ~ 1.0" min="0" max="1" step="0.01">
+              </div>
+              <div>
+                <label>Gini係数</label>
+                <input type="number" id="ovGini" placeholder="0.0 ~ 1.0" min="0" max="1" step="0.01">
+              </div>
+              <div>
+                <label>累積急性期</label>
+                <input type="number" id="ovAcute" placeholder="0 ~ 2000" min="0" max="2000">
+              </div>
+              <div>
+                <label>平均孤立度</label>
+                <input type="number" id="ovIso" placeholder="0.0 ~ 1.0" min="0" max="1" step="0.01">
+              </div>
+            </div>
+          </div>
 
-/* ── Sidebar sections ─────────────────────────────── */
-.sb-sec { padding: 9px 11px 7px; border-bottom: 1px solid var(--border);
-  display: flex; flex-direction: column; gap: 5px; }
-.sb-sec:last-child { border-bottom: none; flex: 1; }
-.sb-title { font-size: .62rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .07em; color: var(--muted); }
-label { display: block; font-size: .7rem; color: var(--muted); margin-bottom: 1px; }
-select, input[type=number] {
-  width: 100%; border: 1px solid var(--border); border-radius: 5px;
-  padding: 3px 6px; font-size: .77rem; background: #f8fafc; outline: none;
-}
-select:focus, input:focus { border-color: var(--accent); }
-.range-wrap { display: flex; align-items: center; gap: 4px; }
-.range-wrap input[type=range] { flex: 1; accent-color: var(--accent); cursor: pointer; }
-.rv { font-size: .77rem; font-weight: 700; color: var(--accent); min-width: 22px; text-align: right; }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-.sc-desc { font-size: .69rem; line-height: 1.5; color: var(--muted);
-  background: #f8fafc; border-radius: 5px; padding: 5px 7px; }
-.sc-desc strong { color: var(--text); }
+          <div class="sb-sec">
+            <button id="btnRun" onclick="runSim()">
+              <div class="spinner"></div>
+              <span id="btnLbl">▶ Run（実行）</span>
+            </button>
+          </div>
 
-#btnRun {
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  background: var(--accent); color: #fff; border: none; border-radius: 7px;
-  padding: 9px 10px; font-size: .84rem; font-weight: 700;
-  cursor: pointer; width: 100%; transition: background .15s;
-}
-#btnRun:hover { background: #1d4ed8; }
-#btnRun:disabled { background: #94a3b8; cursor: not-allowed; }
-.spinner { display: none; width: 13px; height: 13px;
-  border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
-  border-radius: 50%; animation: spin .5s linear infinite; }
-#btnRun.busy .spinner { display: block; }
-@keyframes spin { to { transform: rotate(360deg); } }
+          <div class="sb-sec">
+            <div class="sb-title">Execution log (実行ログ)</div>
+            <div id="logBox">
+              <span style="color:#94a3b8"> It shows progress when running.(実行すると進捗が表示されます)</span>
+            </div>
+          </div>
 
-#logBox {
-  font-size: .66rem; font-family: 'SFMono-Regular', Consolas, monospace;
-  line-height: 1.5; max-height: 100px; overflow-y: auto;
-  background: #f8fafc; border: 1px solid var(--border);
-  border-radius: 5px; padding: 4px 6px; color: var(--muted);
-}
-.log-ok  { color: var(--ok); }
-.log-err { color: var(--danger); }
+        </aside>
 
-/* ── Cards ─────────────────────────────────────── */
-.card { background: var(--panel); border: 1px solid var(--border);
-  border-radius: 9px; overflow: hidden; flex-shrink: 0; }
-.card-hd {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 7px 12px; background: #f8fafc; border-bottom: 1px solid var(--border);
-  font-size: .67rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .06em; color: var(--muted);
-}
-.card-hd-left { display: flex; align-items: center; gap: 6px; }
-.card-body { padding: 10px 12px; }
+        <main class="main" id="mainArea">
 
-/* export button */
-.btn-export {
-  font-size: .65rem; padding: 3px 9px; border-radius: 5px;
-  background: var(--accent); color: #fff; border: none; cursor: pointer;
-  font-weight: 600; transition: background .15s; white-space: nowrap;
-}
-.btn-export:hover { background: #1d4ed8; }
+          <div class="card" id="cardCtx" style="display:none">
+            <div class="card-hd">
+              <div class="card-hd-left">📊 ABMメトリクス — <span id="ctxLbl">—</span></div>
+            </div>
+            <div class="card-body">
+              <div class="metrics-grid" id="metricsGrid"></div>
+              <div class="flags-row" id="flagsRow"></div>
+            </div>
+          </div>
 
-/* ── Metrics ─────────────────────────────────────── */
-.metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 6px; }
-.metric-item { background: #f8fafc; border-radius: 6px; padding: 6px 8px; }
-.m-label { font-size: .61rem; color: var(--muted); }
-.m-value { font-size: 1.15rem; font-weight: 800; line-height: 1.1; margin: 1px 0; }
-.m-sub   { font-size: .6rem; color: var(--muted); }
-.c-ok    { color: var(--ok); }
-.c-warn  { color: var(--warn); }
-.c-danger{ color: var(--danger); }
-.flags-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-.flag { font-size: .64rem; padding: 2px 7px; border-radius: 9px;
-  background: #f1f5f9; border: 1px solid var(--border); color: var(--muted); }
-.flag-a { background:#fef3c7; border-color:#fbbf24; color:#92400e; }
-.flag-b { background:#fee2e2; border-color:#fca5a5; color:#991b1b; }
-.flag-c { background:#dbeafe; border-color:#93c5fd; color:#1e40af; }
+          <div class="card" id="cardDlg" style="display:none">
+            <div class="card-hd">
+              <div class="card-hd-left">💬 多職種退院調整カンファレンス（5ターン）</div>
+              <button class="btn-export" onclick="exportRecord()">📸 会話記録を保存（印刷/PDF）</button>
+            </div>
+            <div class="card-body">
+              <div class="chat-list" id="chatList"></div>
+            </div>
+          </div>
 
-/* ── Chat conference ─────────────────────────────── */
-.chat-list { display: flex; flex-direction: column; gap: 14px; }
+          <div class="card" id="cardEval" style="display:none">
+            <div class="card-hd">
+              <div class="card-hd-left">⚖️ LLM Judge 評価（5ステップ）</div>
+            </div>
+            <div class="card-body">
+              <div class="eval-scores" id="evalScores"></div>
+              <div class="eval-records" id="evalRecords"></div>
+            </div>
+          </div>
 
-/* Agent row: avatar + bubble */
-.chat-row { display: flex; gap: 10px; align-items: flex-start; }
-.chat-row.right { flex-direction: row-reverse; }
-.chat-row.center { justify-content: center; }
-
-/* Avatar */
-.avatar {
-  flex: 0 0 38px; height: 38px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.3rem; box-shadow: 0 1px 4px rgba(0,0,0,.12); flex-shrink: 0;
-}
-.av-doctor      { background: #dbeafe; }
-.av-care        { background: #dcfce7; }
-.av-ai          { background: #f3e8ff; }
-
-/* Bubble */
-.chat-bubble {
-  max-width: 78%; min-width: 120px;
-  border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
-  flex-shrink: 1;
-}
-.bub-hd {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 5px 11px;
-  font-size: .7rem; font-weight: 700;
-}
-.bub-turn-no {
-  background: rgba(0,0,0,.12); color: #fff; border-radius: 9px;
-  padding: 1px 6px; font-size: .6rem; font-weight: 800;
-}
-.bub-hd.doc  { background: #dbeafe; color: #1e3a8a; }
-.bub-hd.care { background: #dcfce7; color: #14532d; }
-.bub-hd.ai   { background: #f3e8ff; color: #4c1d95; }
-
-/* Internal reasoning — collapsible, gray */
-.turn-reasoning, /* compat alias */
-.bub-reasoning {
-  padding: 5px 5px; background: #fafafa;
-  border-bottom: 1px solid var(--border);
-  font-size: 15px; color: var(--muted); line-height: 1.6;
-  white-space: pre-wrap; word-break: break-word;
-  cursor: pointer;
-}
-.bub-reasoning-label {
-  font-size: 15px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 5px; color: #94a3b8; margin-bottom: 2px;
-  display: flex; align-items: center; gap: 5px;
-}
-.r-toggle { font-size: .65rem; color: #94a3b8; }
-.bub-reasoning-body { overflow: hidden; transition: max-height .2s ease; }
-.bub-reasoning-body.collapsed { max-height: 3.2em; }
-.bub-reasoning-body.expanded  { max-height: 9999px; }
-
-/* Dialogue text */
-.bub-text {
-  padding: 8px 11px; font-size: .82rem; line-height: 1.75;
-  white-space: pre-wrap; word-break: break-word; color: var(--text);
-  background: #ffffff;
-}
-
-/* Footer tags */
-.bub-foot {
-  padding: 3px 11px; background: #fafafa; border-top: 1px solid var(--border);
-  display: flex; flex-wrap: wrap; gap: 4px;
-}
-.tag { font-size: .62rem; padding: 2px 7px; border-radius: 9px;
-  background: #f1f5f9; border: 1px solid var(--border); color: var(--muted); }
-.tag-ok    { background: #dcfce7; border-color: #86efac; color: #166534; }
-.tag-warn  { background: #fef9c3; border-color: #fde047; color: #854d0e; }
-.tag-nudge { background: #f3e8ff; border-color: #d8b4fe; color: #6b21a8; }
-
-/* System AI row */
-.chat-row.center .chat-bubble {
-  max-width: 90%; background: #faf5ff; border-color: #d8b4fe;
-}
-.chat-row.center .bub-hd { background: #f3e8ff; justify-content: center; }
-.chat-row.center .bub-text { background: #faf5ff; }
-
-/* ── Eval ─────────────────────────────────────────── */
-.eval-scores { display: flex; gap: 8px; margin-bottom: 8px; }
-.eval-score { flex: 1; background: #f8fafc; border-radius: 7px; padding: 8px 10px;
-  display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.es-label { font-size: .66rem; color: var(--muted); }
-.es-value { font-size: 1.5rem; font-weight: 800; }
-.eval-records { display: flex; flex-direction: column; gap: 5px; }
-.eval-rec { font-size: .74rem; background: #fafafa;
-  border: 1px solid var(--border); border-radius: 6px;
-  padding: 6px 9px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
-.er-ctx { color: var(--muted); font-size: .64rem; margin-bottom: 2px; }
-.er-scores { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
-.er-scores span { font-size: .62rem; padding: 2px 7px; border-radius: 9px;
-  background: #e0f2fe; color: #0369a1; }
-
-/* ── Empty ─────────────────────────────────────────── */
-.empty { flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 8px; color: var(--muted); text-align: center; padding: 30px; }
-.empty .icon { font-size: 2rem; }
-.empty p { font-size: .8rem; line-height: 1.65; max-width: 280px; }
-
-/* ── Print / Export ────────────────────────────────── */
-@media print {
-  body { overflow: visible !important; background: #fff; }
-  html, body { height: auto; }
-  #app { height: auto; }
-  .layout { flex-direction: column; }
-  .sidebar { display: none; }
-  .main { overflow: visible; padding: 20px; }
-  .card { break-inside: avoid; margin-bottom: 16px; }
-  header { position: static; }
-  #btnRun, .btn-export, #logBox, .sb-sec { display: none !important; }
-  .bub-reasoning-body.collapsed { max-height: 9999px !important; }
-}
-</style>
-</head>
-<body>
-<div id="app">
-<header>
-  🏥 DAI-CICS simulation demo
-  <span>Network ABM × LLM Conference</span>
-</header>
-<div class="layout">
-
-<!-- ─── Sidebar ────────────────────────────── -->
-<aside class="sidebar">
-  <div class="sb-sec">
-    <div class="sb-title">実験条件</div>
-    <div>
-      <label>シナリオ</label>
-      <select id="selScenario">
-        <option value="A">A</option>
-        <option value="B">B</option>
-        <option value="C" selected>C</option>
-        <option value="C-noN2">C-noN2</option>
-        <option value="C-noN3">C-noN3</option>
-        <option value="C-onlyL1">C-onlyL1</option>
-      </select>
-    </div>
-    <div id="scDesc" class="sc-desc"></div>
-    <div>
-      <label>Day <b id="dayLbl" style="color:var(--accent)">45</b></label>
-      <div class="range-wrap">
-        <input type="range" id="slDay" min="1" max="100" value="45">
-        <span class="rv" id="dayNum">45</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="sb-sec">
-    <div class="sb-title">オーバーライド <span style="font-size:.6rem;color:#94a3b8">（空欄=ABM値）</span></div>
-    <div class="grid2">
-      <div><label>CM疲労度</label><input type="number" id="ovFat" placeholder="0.88" min="0" max="1" step="0.01"></div>
-      <div><label>Gini係数</label><input type="number" id="ovGini" placeholder="0.45" min="0" max="1" step="0.01"></div>
-      <div><label>累積急性期</label><input type="number" id="ovAcute" placeholder="420" min="0"></div>
-      <div><label>平均孤立度</label><input type="number" id="ovIso" placeholder="0.73" min="0" max="1" step="0.01"></div>
-    </div>
-  </div>
-
-  <div class="sb-sec">
-    <button id="btnRun" onclick="runSim()">
-      <div class="spinner"></div>
-      <span id="btnLbl">▶ シミュレーション実行</span>
-    </button>
-  </div>
-
-  <div class="sb-sec">
-    <div class="sb-title">実行ログ</div>
-    <div id="logBox"><span style="color:#94a3b8">実行すると進捗が表示されます</span></div>
-  </div>
-</aside>
-
-<!-- ─── Main ──────────────────────────────── -->
-<main class="main" id="mainArea">
-
-  <div class="card" id="cardCtx" style="display:none">
-    <div class="card-hd">
-      <div class="card-hd-left">📊 ABMメトリクス — <span id="ctxLbl">—</span></div>
-    </div>
-    <div class="card-body">
-      <div class="metrics-grid" id="metricsGrid"></div>
-      <div class="flags-row" id="flagsRow"></div>
-    </div>
-  </div>
-
-  <div class="card" id="cardDlg" style="display:none">
-    <div class="card-hd">
-      <div class="card-hd-left">💬 多職種退院調整カンファレンス（5ターン）</div>
-      <button class="btn-export" onclick="exportRecord()">📸 会話記録を保存（印刷/PDF）</button>
-    </div>
-    <div class="card-body">
-      <div class="chat-list" id="chatList"></div>
-    </div>
-  </div>
-
-  <div class="card" id="cardEval" style="display:none">
-    <div class="card-hd">
-      <div class="card-hd-left">⚖️ LLM Judge 評価（5ステップ）</div>
-    </div>
-    <div class="card-body">
-      <div class="eval-scores" id="evalScores"></div>
-      <div class="eval-records" id="evalRecords"></div>
-    </div>
-  </div>
-
-  <div class="empty" id="emptyState">
-    <div class="icon">🔬</div>
-    <p>左パネルでシナリオと Day を選択し、<br>
-    <strong>「シミュレーション実行」</strong>を押してください。<br><br>
-    5 ターンの退院調整カンファレンスが<br>リアルタイムで表示されます。</p>
-  </div>
-
-</main>
-</div>
-</div>
-
-<script>
-// ─── Scenario descriptions ────────────────────────────
-const SC_DESC = {
-  A: '<strong>ホモ・エコノミカス分断・利他行動ゼロ</strong>',
-  B: '<strong>共同体過依存・搾取</strong>',
-  C: '<strong>AI支援・超包括ケア</strong>',
-  'C-noN2': '<strong>社会的処方ナッジ（N2）なし。</strong>',
-  'C-noN3': '<strong>負荷再配分ナッジ（N3）なし。</strong>',
-  'C-onlyL1': '<strong>L1情報提示のみ。</strong>',
-};
-const sel = document.getElementById('selScenario');
-const updDesc = () => document.getElementById('scDesc').innerHTML = SC_DESC[sel.value] || '';
-sel.addEventListener('change', updDesc); updDesc();
-
-const slDay = document.getElementById('slDay');
-slDay.addEventListener('input', () => {
-  document.getElementById('dayLbl').textContent = slDay.value;
-  document.getElementById('dayNum').textContent = slDay.value;
-});
-
-// ─── Color helpers ─────────────────────────────────────
-function cls(v, w, d, inv=false) {
-  if (typeof v !== 'number') return '';
-  if (inv) return v >= w ? '' : v >= d ? 'c-warn' : 'c-danger';
-  return v < w ? '' : v < d ? 'c-warn' : 'c-danger';
-}
-function scoreColor(v) {
-  return typeof v!=='number' ? 'var(--muted)' : v>=.8 ? 'var(--ok)' : v>=.6 ? 'var(--warn)' : 'var(--danger)';
-}
-function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-function fmt(v) {
-  if (typeof v !== 'number') return v;
-  return v >= 100 ? Math.round(v) : v >= 10 ? v.toFixed(1) : v.toFixed(3);
-}
-
-// ─── Robust text extraction from turn object ────────────
-const DIALOGUE_KEYS = ['spoken_dialogue','dialogue','speech','message','text',
-  'response','発言','content','statement','utterance','output'];
-const REASONING_KEYS = ['internal_reasoning','reasoning','thinking','thought',
-  'rationale','内部思考','internal_thought','chain_of_thought','system_analysis',
-  'system_reasoning'];
-const INTERVENTION_KEYS = ['proposed_intervention','intervention','plan','proposal',
-  'action_plan'];
-const SKIP_KEYS = new Set(['agent','turn','timestamp','fatigue','altruism',
-  'fc_triggered','nudge_level','applied_nudge','proposed_action_type','milestone_achieved',
-  'milestone_hit','cm_fatigue_after_nudge']);
-
-function extractText(t, keys) {
-  for (const k of keys) { if (t[k] && typeof t[k]==='string' && t[k].length>5) return t[k]; }
-  return '';
-}
-function extractDialogue(t) {
-  return extractText(t, DIALOGUE_KEYS) || extractText(t, INTERVENTION_KEYS) ||
-    // last resort: longest string value not in skip keys
-    Object.entries(t).filter(([k,v])=>typeof v==='string'&&!SKIP_KEYS.has(k)&&v.length>20)
-      .sort((a,b)=>b[1].length-a[1].length).map(e=>e[1])[0] || '';
-}
-function extractReasoning(t) {
-  return extractText(t, REASONING_KEYS);
-}
-
-// ─── Render context card ────────────────────────────────
-function renderContext(ctx) {
-  document.getElementById('ctxLbl').textContent =
-    `${ctx.abm_scenario} · Day ${ctx.abm_day}`;
-  document.getElementById('cardCtx').style.display = '';
-  const ms = [
-    {label:'CM疲労度',   val:ctx.cm_fatigue,           sub:'mean_fatigue',  c:cls(ctx.cm_fatigue,.70,.85)},
-    {label:'孤立度',     val:ctx.mean_isolation,        sub:'isolation',     c:cls(ctx.mean_isolation,.50,.75)},
-    {label:'SDHリスク',  val:ctx.mean_sdh_risk,         sub:'sdh_risk',      c:cls(ctx.mean_sdh_risk,.50,.70)},
-    {label:'累積急性期', val:ctx.cum_acute_events,      sub:'入院相当',       c:cls(ctx.cum_acute_events,400,800)},
-    {label:'Gini係数',   val:ctx.gini_fatigue,          sub:'負荷集中度',     c:cls(ctx.gini_fatigue,.25,.40)},
-    {label:'連携レベル', val:ctx.coordination_level,    sub:'coordination',  c:cls(ctx.coordination_level,.70,.40,true)},
-    {label:'バーンアウト',val:ctx.burnout_count,        sub:'累積人数',       c:cls(ctx.burnout_count,5,15)},
-    {label:'ナッジ数',   val:ctx.total_nudge_interventions||0, sub:'累積', c:''},
-  ];
-  document.getElementById('metricsGrid').innerHTML = ms.map(m=>
-    `<div class="metric-item">
-       <div class="m-label">${m.label}</div>
-       <div class="m-value ${m.c}">${fmt(m.val)}</div>
-       <div class="m-sub">${m.sub}</div>
-     </div>`).join('');
-  const flags = [];
-  if (ctx.fc_a1>0) flags.push(`<span class="flag flag-a">FC-A1: ${ctx.fc_a1}回</span>`);
-  if (ctx.fc_a2>0) flags.push(`<span class="flag flag-a">FC-A2: ${ctx.fc_a2}回</span>`);
-  if (ctx.fc_b1>0) flags.push(`<span class="flag flag-b">FC-B1: ${ctx.fc_b1}回</span>`);
-  if (ctx.fc_b2>0) flags.push(`<span class="flag flag-b">FC-B2: ${ctx.fc_b2}回</span>`);
-  if (ctx.fc_c1>0) flags.push(`<span class="flag flag-c">FC-C1: ${ctx.fc_c1}回</span>`);
-  if (!flags.length) flags.push('<span class="flag">✓ 失敗条件なし</span>');
-  document.getElementById('flagsRow').innerHTML = flags.join('');
-}
-
-// ─── Render turn as chat bubble ─────────────────────────
-const AGENT_META = {
-  Doctor:      { emoji:'👨‍⚕️', name:'主治医',              pos:'left',   hd:'doc',  av:'av-doctor' },
-  CareManager: { emoji:'🧑‍💼', name:'ケアマネジャー',       pos:'right',  hd:'care', av:'av-care'   },
-  PlannerAI:   { emoji:'🤖', name:'PlannerAI（AI支援）',   pos:'center', hd:'ai',   av:'av-ai'     },
-};
-function renderTurn(t) {
-  const agent = t.agent || 'Unknown';
-  const meta  = AGENT_META[agent] || { emoji:'💬', name:agent, pos:'left', hd:'doc', av:'av-doctor' };
-
-  const dialogue  = extractDialogue(t);
-  const reasoning = extractReasoning(t);
-
-  const tags = [];
-  if (t.milestone_achieved)    tags.push(`<span class="tag tag-ok">✅ ${esc(t.milestone_achieved)}</span>`);
-  if (t.milestone_hit)         tags.push(`<span class="tag tag-ok">🏁 ${esc(t.milestone_hit)}</span>`);
-  if (t.fc_triggered)          tags.push(`<span class="tag tag-warn">⚠️ ${esc(t.fc_triggered)}</span>`);
-  if (t.nudge_level)           tags.push(`<span class="tag tag-nudge">🎯 L${t.nudge_level} ${esc(t.applied_nudge||'')}</span>`);
-  if (t.proposed_action_type)  tags.push(`<span class="tag">${esc(t.proposed_action_type)}</span>`);
-
-  const rid = `r-${t.turn || Date.now()}`;
-
-  const row = document.createElement('div');
-  row.className = `chat-row ${meta.pos}`;
-  row.innerHTML =
-    (meta.pos !== 'center' ? `<div class="avatar ${meta.av}">${meta.emoji}</div>` : '') +
-    `<div class="chat-bubble">
-       <div class="bub-hd ${meta.hd}">
-         <span>${meta.emoji} ${meta.name}</span>
-         <span class="bub-turn-no">T${t.turn||'?'}</span>
-       </div>` +
-    (reasoning ? `
-       <div class="bub-reasoning" onclick="toggleR('${rid}')">
-         <div class="bub-reasoning-label">
-           💭 内部思考
-           <span class="r-toggle" id="${rid}-btn">▼ 展開</span>
-         </div>
-         <div class="bub-reasoning-body collapsed" id="${rid}">${esc(reasoning)}</div>
-       </div>` : '') +
-    (dialogue ? `<div class="bub-text">${esc(dialogue)}</div>` :
-      `<div class="bub-text" style="color:var(--muted);font-style:italic">（発言テキストなし — ターンデータ: ${esc(JSON.stringify(t).substring(0,120))}）</div>`) +
-    (tags.length ? `<div class="bub-foot">${tags.join('')}</div>` : '') +
-    `</div>`;
-
-  document.getElementById('chatList').appendChild(row);
-  document.getElementById('cardDlg').style.display = '';
-  row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function toggleR(id) {
-  const body = document.getElementById(id);
-  const btn  = document.getElementById(id+'-btn');
-  if (!body) return;
-  const expanded = body.classList.toggle('expanded');
-  body.classList.toggle('collapsed', !expanded);
-  btn.textContent = expanded ? '▲ 閉じる' : '▼ 展開';
-}
-
-// ─── Render eval card ───────────────────────────────────
-function renderEval(ev) {
-  document.getElementById('cardEval').style.display = '';
-  const sum = ev.summary || {};
-  const ff = sum.mean_faithfulness    ?? '—';
-  const cr = sum.mean_context_relevance ?? '—';
-  document.getElementById('evalScores').innerHTML =
-    `<div class="eval-score">
-       <div class="es-label">Faithfulness</div>
-       <div class="es-value" style="color:${scoreColor(ff)}">${typeof ff==='number'?ff.toFixed(2):ff}</div>
-     </div>
-     <div class="eval-score">
-       <div class="es-label">Context Relevance</div>
-       <div class="es-value" style="color:${scoreColor(cr)}">${typeof cr==='number'?cr.toFixed(2):cr}</div>
-     </div>`;
-  if (ev.error) {
-    document.getElementById('evalRecords').innerHTML =
-      `<div class="eval-rec" style="color:var(--danger)">${esc(ev.error)}</div>`;
-    return;
-  }
-  document.getElementById('evalRecords').innerHTML = (ev.records||[]).map((r,i)=>
-    `<div class="eval-rec">
-       <div class="er-ctx">Step ${i+1} · ${esc(r.context||'')}</div>
-       <div>${esc(r.reasoning||r.output||'—')}</div>
-       <div class="er-scores">
-         <span>Faithfulness: ${r.faithfulness??'—'}</span>
-         <span>ContextRelevance: ${r.context_relevance??'—'}</span>
-       </div>
-     </div>`).join('');
-}
-
-// ─── Log helper ─────────────────────────────────────────
-function logLine(msg, type='') {
-  const box = document.getElementById('logBox');
-  if (box.children.length===1 && box.children[0].tagName==='SPAN') box.innerHTML='';
-  const el = document.createElement('div');
-  if (type==='ok')  el.className='log-ok';
-  if (type==='err') el.className='log-err';
-  el.textContent = msg;
-  box.appendChild(el);
-  box.scrollTop = box.scrollHeight;
-}
-
-// ─── Export (print to PDF / screenshot) ─────────────────
-function exportRecord() {
-  // Expand all reasoning sections before printing
-  document.querySelectorAll('.bub-reasoning-body.collapsed').forEach(el => {
-    el.classList.remove('collapsed');
-    el.classList.add('expanded');
-  });
-  setTimeout(() => window.print(), 100);
-}
-
-// ─── Main simulation runner ──────────────────────────────
-async function runSim() {
-  const btn = document.getElementById('btnRun');
-  btn.disabled = true; btn.classList.add('busy');
-  document.getElementById('btnLbl').textContent = '実行中…';
-  document.getElementById('logBox').innerHTML = '<span style="color:#94a3b8">実行中…</span>';
-  ['cardCtx','cardDlg','cardEval'].forEach(id=>document.getElementById(id).style.display='none');
-  document.getElementById('chatList').innerHTML = '';
-  document.getElementById('emptyState').style.display = 'none';
-
-  const sc  = document.getElementById('selScenario').value;
-  const day = parseInt(document.getElementById('slDay').value);
-  const body = { scenario: sc, day };
-  const fat  = document.getElementById('ovFat').value;
-  const gini = document.getElementById('ovGini').value;
-  const acu  = document.getElementById('ovAcute').value;
-  const iso  = document.getElementById('ovIso').value;
-  if (fat)  body.cm_fatigue       = parseFloat(fat);
-  if (gini) body.gini_fatigue     = parseFloat(gini);
-  if (acu)  body.cum_acute_events = parseInt(acu);
-  if (iso)  body.mean_isolation   = parseFloat(iso);
-
-  try {
-    const res = await fetch('/api/run', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const e = await res.json().catch(()=>({}));
-      throw new Error(e.detail || `HTTP ${res.status}`);
-    }
-    const reader = res.body.getReader();
-    const dec = new TextDecoder();
-    let buf = '';
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      const lines = buf.split('\n'); buf = lines.pop();
-      for (const line of lines) {
-        if (!line.trim()) continue;
-        let evt;
-        try { evt = JSON.parse(line); } catch { continue; }
-        switch (evt.type) {
-          case 'log':     logLine(evt.msg, evt.msg.startsWith('✅') ? 'ok' : ''); break;
-          case 'context': renderContext(evt.data); break;
-          case 'turn':    renderTurn(evt.data);    break;
-          case 'eval':    renderEval(evt.data);    break;
-          case 'done':    logLine('🏁 完了', 'ok'); break;
-          case 'error':   logLine('❌ '+evt.msg, 'err');
-            document.getElementById('emptyState').style.display='flex'; break;
-        }
-      }
-    }
-  } catch(e) {
-    logLine('❌ '+e.message, 'err');
-    document.getElementById('emptyState').style.display = 'flex';
-  } finally {
-    btn.disabled = false; btn.classList.remove('busy');
-    document.getElementById('btnLbl').textContent = '▶ シミュレーション実行';
-  }
-}
-</script>
-</body>
+          <div class="empty" id="emptyState">
+            <div class="icon">🔬</div>
+            <p>
+              Select the scenario and day in the left panel, then press <strong>Run</strong>. A 5-turn discharge planning conference will be displayed.
+              <br>左パネルでシナリオと経過日数を選択し、<strong>「実行」</strong>を押してください。5 ターンの退院調整カンファレンスが表示されます。
+            </p>
+          </div>
+        </main>
+      </div><!-- /.layout -->
+    </div><!-- /#app -->
+    <script src="/static/script.js"></script>
+  </body>
 </html>
