@@ -58,7 +58,7 @@ Where $U_i$ is traditional economic utility, $E_i$ represents Eudaimonia (virtue
 Ensure you have Python 3.9+ installed. Clone the repository and install the required dependencies.
 
 ```bash
-git clone [https://github.com/Aicurion/yasuHP.git](https://github.com/Aicurion/yasuHP.git)
+git clone [https://github.com/ciao421/DAI-CICS.git](https://github.com/ciao421/DAI-CICS.git)
 cd DAI-CICS
 pip install -r requirements.txt
 ````
