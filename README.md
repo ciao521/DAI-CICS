@@ -4,8 +4,6 @@
 **Institutional Design and Dynamic Analysis of Intervention in the Community-based Integrated Care System**
 
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg?style=for-the-badge&logo=python)](https://www.python.org/)
-[![Framework: Mesa](https://img.shields.io/badge/Framework-Mesa-4CAF50.svg?style=for-the-badge)](https://mesa.readthedocs.io/)
-[![LLM: Claude/Bedrock](https://img.shields.io/badge/LLM-Claude_3_Opus-FF9900.svg?style=for-the-badge&logo=amazonaws)](https://aws.amazon.com/bedrock/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 *A Multi-Agent Simulation Framework with LLM-driven Nudges for Sustainable Healthcare Systems.*
