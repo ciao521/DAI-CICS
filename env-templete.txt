@@ -1,0 +1,8 @@
+# DAI-CICS environment variables
+# export before running
+# 1. Set up  AWS Bedrock bearer token (used by src/llm_agents.py and src/dialogue_sim.py)
+# 2. Weights & Biases API key (project: healthcare-collaboration-sim, entity: yshr-i)
+# 3. Anthropic direct API key (optional; falls back to Bedrock if not set)
+AWS_BEARER_TOKEN_BEDROCK=
+WANDB_API_KEY=
+ANTHROPIC_API_KEY=

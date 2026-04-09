@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAI-CICS Simulation Demo</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        DAI-CICS simulation demo<span>Network ABM × LLM Conference</span>
+      </header>
+      <div class="layout">
+        <!-- ─── Sidebar ────────────────────────────── -->
+        <aside class="sidebar">
+
+          <div class="sb-sec">
+            <div class="sb-title">Experiment Condition <br> (実験条件)</div>
+            <div>
+              <label>Scenario（シナリオ）</label>
+              <select id="selScenario">
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C" selected>C</option>
+                <option value="C-noN2">C-noN2</option>
+                <option value="C-noN3">C-noN3</option>
+                <option value="C-onlyL1">C-onlyL1</option>
+              </select>
+            </div>
+            <div id="scDesc" class="sc-desc"></div>
+            <div>
+              <label>Day <b id="dayLbl" style="color:var(--accent)">45</b></label>
+              <div class="range-wrap">
+                <input type="range" id="slDay" min="1" max="100" value="45">
+                <span class="rv" id="dayNum">45</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sb-sec">
+            <div class="sb-title">
+              Override Parameters
+              <span style="font-size:.6rem;color:#94a3b8">（空欄の場合は、デフォルトの値で実行されます）</span>
+            </div>
+            <div class="grid2">
+              <div>
+                <label>CM疲労度</label>
+                <input type="number" id="ovFat" placeholder="0.0 ~ 1.0" min="0" max="1" step="0.01">
+              </div>
+              <div>
+                <label>Gini係数</label>
+                <input type="number" id="ovGini" placeholder="0.0 ~ 1.0" min="0" max="1" step="0.01">
+              </div>
+              <div>
+                <label>累積急性期</label>
+                <input type="number" id="ovAcute" placeholder="0 ~ 2000" min="0" max="2000">
+              </div>
+              <div>
+                <label>平均孤立度</label>
+                <input type="number" id="ovIso" placeholder="0.0 ~ 1.0" min="0" max="1" step="0.01">
+              </div>
+            </div>
+          </div>
+
+          <div class="sb-sec">
+            <button id="btnRun" onclick="runSim()">
+              <div class="spinner"></div>
+              <span id="btnLbl">▶ Run（実行）</span>
+            </button>
+          </div>
+
+          <div class="sb-sec">
+            <div class="sb-title">Execution log (実行ログ)</div>
+            <div id="logBox">
+              <span style="color:#94a3b8"> It shows progress when running.(実行すると進捗が表示されます)</span>
+            </div>
+          </div>
+
+        </aside>
+
+        <main class="main" id="mainArea">
+
+          <div class="card" id="cardCtx" style="display:none">
+            <div class="card-hd">
+              <div class="card-hd-left">📊 ABMメトリクス — <span id="ctxLbl">—</span></div>
+            </div>
+            <div class="card-body">
+              <div class="metrics-grid" id="metricsGrid"></div>
+              <div class="flags-row" id="flagsRow"></div>
+            </div>
+          </div>
+
+          <div class="card" id="cardDlg" style="display:none">
+            <div class="card-hd">
+              <div class="card-hd-left">💬 多職種退院調整カンファレンス（5ターン）</div>
+              <button class="btn-export" onclick="exportRecord()">📸 会話記録を保存（印刷/PDF）</button>
+            </div>
+            <div class="card-body">
+              <div class="chat-list" id="chatList"></div>
+            </div>
+          </div>
+
+          <div class="card" id="cardEval" style="display:none">
+            <div class="card-hd">
+              <div class="card-hd-left">⚖️ LLM Judge 評価（5ステップ）</div>
+            </div>
+            <div class="card-body">
+              <div class="eval-scores" id="evalScores"></div>
+              <div class="eval-records" id="evalRecords"></div>
+            </div>
+          </div>
+
+          <div class="empty" id="emptyState">
+            <div class="icon">🔬</div>
+            <p>
+              Select the scenario and day in the left panel, then press <strong>Run</strong>. A 5-turn discharge planning conference will be displayed.
+              <br>左パネルでシナリオと経過日数を選択し、<strong>「実行」</strong>を押してください。5 ターンの退院調整カンファレンスが表示されます。
+            </p>
+          </div>
+        </main>
+      </div><!-- /.layout -->
+    </div><!-- /#app -->
+    <script src="/static/script.js"></script>
+  </body>
+</html>
