@@ -8,7 +8,8 @@ Produced figures:
   4. ablation_timeseries.png – Ablation time-series (4 panels)
   5. fc_heatmap.png          – Failure condition cumulative counts heatmap
   6. milestones.png          – Milestone achievement rate time-series
-  7. virtue_eudaimonia.png   – Virtue and Eudaimonia Dynamics [追加]
+  7. virtue_eudaimonia.png   – Virtue and Eudaimonia Dynamics
+  8. swf_timeseries.png      – Modified Social Welfare Function Dynamics [追加]
 """
 from __future__ import annotations
 
@@ -339,6 +340,56 @@ def plot_eudaimonia_timeseries(df: pd.DataFrame, out_dir: Path) -> None:
 
 
 # ──────────────────────────────────────────────────────────────
+# Figure 8: Modified Social Welfare Function Dynamics [追加]
+# ──────────────────────────────────────────────────────────────
+
+def plot_swf_timeseries(df: pd.DataFrame, out_dir: Path) -> None:
+    labels = [l for l in ["A", "B", "C"] if l in df["label"].unique()]
+    if not labels:
+        return
+
+    # Check if SWF columns exist
+    if "social_welfare" not in df.columns:
+        return
+
+    metrics = [
+        ("swf_utility", "Aggregate Utility ($U_i$)"),
+        ("swf_eudaimonia", "Aggregate Eudaimonia ($E_i$)"),
+        ("swf_penalty", "Exploitation Penalty (Fatigue > 0.90)"),
+        ("social_welfare", "Modified Social Welfare ($W$)"),
+    ]
+    
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+    axes = axes.flatten()
+
+    for ax, (col, title) in zip(axes, metrics):
+        for lbl in labels:
+            if col not in df.columns:
+                continue
+            days, mean, std = _agg(df, lbl, col)
+            _fill_plot(ax, days, mean, std,
+                       color=PALETTE.get(lbl, "grey"),
+                       ls=LINE_STYLES.get(lbl, "-"),
+                       label=f"Scenario {lbl}")
+        ax.set_title(title, fontsize=11)
+        ax.set_xlabel("Day")
+        
+        # Penalty is plotted inverted or just absolute, here we show absolute penalty amount
+        if col == "swf_penalty":
+            ax.set_ylabel("Penalty Magnitude (Lower is better)")
+        
+        ax.legend(fontsize=8)
+        ax.grid(True, alpha=0.3)
+
+    fig.suptitle("Modified Social Welfare Function Dynamics", fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    path = out_dir / "swf_timeseries.png"
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    print(f"  Saved -> results/{path.name}")
+
+
+# ──────────────────────────────────────────────────────────────
 # Master function
 # ──────────────────────────────────────────────────────────────
 
@@ -359,6 +410,7 @@ def make_all_plots(df: pd.DataFrame, days: int = 100, n_seeds: int = 10) -> None
     plot_ablation_bar(df, out_dir)
     plot_ablation_timeseries(df, out_dir)
     plot_eudaimonia_timeseries(df, out_dir)
+    plot_swf_timeseries(df, out_dir)
     print("All plots saved to results/")
 
 

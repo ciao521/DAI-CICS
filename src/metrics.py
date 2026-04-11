@@ -82,6 +82,29 @@ def compute_daily_metrics(model: "CareNetworkModel", day: int) -> dict[str, Any]
     coop_today = sum(w.cooperation_acts_today for w in workers)
     coop_rate = coop_today / n_elders  # normalised per elder
 
+    # ── Virtue, Eudaimonia & SWF (Modified Social Welfare) ────
+    mean_virtue = float(np.mean([getattr(w, 'virtue', 0.0) for w in workers])) if workers else 0.0
+    mean_eudaimonia = float(np.mean([getattr(w, 'eudaimonia', 0.5) for w in workers])) if workers else 0.0
+
+    LAMBDA_WEIGHT = 1.0  # 徳的幸福（エウダイモニア）の重み
+    GAMMA_WEIGHT = 5.0   # やりがい搾取（閾値超過）に対するペナルティ重み
+    F_THRESHOLD = 0.90   # バーンアウト閾値
+
+    if workers:
+        # U_i: 経済的効用（モデル上の報酬変数を代理指標とする。デフォルトは1.0）
+        u_total = sum(getattr(w, 'reward', 1.0) for w in workers)
+        # E_i: エウダイモニア（徳的幸福）
+        e_total = sum(getattr(w, 'eudaimonia', 0.5) for w in workers)
+        # Penalty: 疲労閾値超過に対するペナルティ
+        penalty_total = sum(max(0.0, w.fatigue - F_THRESHOLD) for w in workers)
+        # 社会的厚生（SWF）の算出
+        social_welfare = u_total + (LAMBDA_WEIGHT * e_total) - (GAMMA_WEIGHT * penalty_total)
+    else:
+        u_total = 0.0
+        e_total = 0.0
+        penalty_total = 0.0
+        social_welfare = 0.0
+
     # ── Coordination level ────────────────────────────────────
     coord = model.coordination_level
 
@@ -240,6 +263,13 @@ def compute_daily_metrics(model: "CareNetworkModel", day: int) -> dict[str, Any]
         "burnout_count": burnout_count,
         "top10_load_ratio": round(top10_ratio, 4),
         "coop_acts_today": coop_today,
+        # Virtue & SWF
+        "mean_virtue": round(mean_virtue, 4),
+        "mean_eudaimonia": round(mean_eudaimonia, 4),
+        "swf_utility": round(float(u_total), 4),
+        "swf_eudaimonia": round(float(e_total), 4),
+        "swf_penalty": round(float(penalty_total), 4),
+        "social_welfare": round(float(social_welfare), 4),
         # Network
         "coordination_level": round(coord, 4),
         "pending_tasks": len(model.pending_tasks),

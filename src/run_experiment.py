@@ -89,6 +89,7 @@ def summarise(df: pd.DataFrame) -> pd.DataFrame:
         "mean_fatigue", "gini_fatigue", "burnout_count",
         "cum_acute_events",
         "mean_virtue", "mean_eudaimonia",
+        "swf_utility", "swf_eudaimonia", "swf_penalty", "social_welfare",  # 追加: 修正された社会的厚生関数(SWF)の構成要素
         "cum_M1", "cum_M2", "cum_M3", "cum_M4", "cum_M5",
         "cum_FC_A1", "cum_FC_A2", "cum_FC_A3",
         "cum_FC_B1", "cum_FC_B2", "cum_FC_B3", "cum_FC_B4",
