@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 *A Multi-Agent Simulation Framework with LLM-driven Nudges for Sustainable Healthcare Systems.*
-V1.0 - 04/10/2025
+<br>* author :　Yasuhiro IWAI,  * created :　04/10/2026 <br> 
 </div>
 
 ---
