@@ -95,6 +95,7 @@ def summarise(df: pd.DataFrame) -> pd.DataFrame:
         "cum_FC_B1", "cum_FC_B2", "cum_FC_B3", "cum_FC_B4",
         "cum_FC_C1", "cum_FC_C2", "cum_FC_C3",
         "total_nudge_interventions",
+        "nudge_N1", "nudge_N2", "nudge_N3", "nudge_N4", "nudge_N5", # 追加: N1〜N5の個別ナッジ回数
     ]
     last_day = df.groupby(["label", "seed"]).last().reset_index()
     available = [c for c in key_cols if c in last_day.columns]

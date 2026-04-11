@@ -258,6 +258,10 @@ class AIWatcher(Agent):
         self.nudge_accepted_count: int = 0
         self.nudge_rejected_count: int = 0
         self.total_interventions: int = 0
+        # --- [追加実装] 各ナッジ (N1〜N5) の実行回数を記録するカウンタ ---
+        self.nudge_counts: dict[str, int] = {
+            "N1": 0, "N2": 0, "N3": 0, "N4": 0, "N5": 0
+        }
 
     def step(self) -> None:
         if not self.model.scenario_cfg.ai_active:
@@ -273,6 +277,10 @@ class AIWatcher(Agent):
             "accepted": accepted,
         })
         self.total_interventions += 1
+        base_nudge_type = nudge_id.split("_")[0] 
+        if base_nudge_type in self.nudge_counts:
+            self.nudge_counts[base_nudge_type] += 1
+            
         if accepted:
             self.nudge_accepted_count += 1
         else:

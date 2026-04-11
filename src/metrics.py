@@ -244,6 +244,12 @@ def compute_daily_metrics(model: "CareNetworkModel", day: int) -> dict[str, Any]
             model.fc_counts["FC-C3"] += 1
     model._prev_mean_isolation = mean_iso
 
+    n1_count = sum(getattr(a, 'nudge_counts', {}).get("N1", 0) for a in ai_watchers)
+    n2_count = sum(getattr(a, 'nudge_counts', {}).get("N2", 0) for a in ai_watchers)
+    n3_count = sum(getattr(a, 'nudge_counts', {}).get("N3", 0) for a in ai_watchers)
+    n4_count = sum(getattr(a, 'nudge_counts', {}).get("N4", 0) for a in ai_watchers)
+    n5_count = sum(getattr(a, 'nudge_counts', {}).get("N5", 0) for a in ai_watchers)
+
     # ── Assemble row ──────────────────────────────────────────
     row: dict[str, Any] = {
         "day": day,
@@ -297,5 +303,10 @@ def compute_daily_metrics(model: "CareNetworkModel", day: int) -> dict[str, Any]
         "cum_FC_C2": model.fc_counts["FC-C2"],
         "cum_FC_C3": model.fc_counts["FC-C3"],
         "total_nudge_interventions": total_nudges,
+        "nudge_N1": n1_count,
+        "nudge_N2": n2_count,
+        "nudge_N3": n3_count,
+        "nudge_N4": n4_count,
+        "nudge_N5": n5_count,
     }
     return row
