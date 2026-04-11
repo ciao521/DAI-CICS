@@ -108,6 +108,12 @@ class CareNetworkModel(Model):
         self._make_agents(Manager, C.N_MANAGERS)
         self._make_agents(AIWatcher, C.N_AI_WATCHERS)
 
+        # --- [追加実装] 徳(Virtue)とエウダイモニア(Eudaimonia)の初期化 ---
+        # 全ての提供者エージェント（Provider, Family, LinkWorker）に精神的変数を付与
+        for w in self.workers:
+            w.virtue = 0.0
+            w.eudaimonia = 0.5  # エウダイモニアの初期値（0.0〜1.0）
+
     # ----------------------------------------------------------
     # Typed agent accessors
     # ----------------------------------------------------------
@@ -192,6 +198,9 @@ class CareNetworkModel(Model):
 
         # Phase 8: Coordination update
         self._update_coordination()
+
+        # Phase 8.5: Virtue & Eudaimonia Dynamics [追加実装]
+        self._update_eudaimonia(day)
 
         # Phase 9: Metrics
         self._collect_metrics(day)
@@ -305,6 +314,13 @@ class CareNetworkModel(Model):
             if ok:
                 target.apply_prevention_care()
                 helped_ids.add(target.unique_id)
+                
+                # --- [追加実装] 徳とエウダイモニアの蓄積メカニズム ---
+                # 利他的行動（インフォーマルな互助介入）を実行することで徳が実践される
+                w.virtue += 0.05
+                # 使命感に基づく徳の実践は、持続的幸福（エウダイモニア）を上昇させる
+                eudaimonia_gain = 0.02 * w.altruism
+                w.eudaimonia = min(1.0, w.eudaimonia + eudaimonia_gain)
 
     # ----------------------------------------------------------
     # Coordination update
@@ -320,12 +336,38 @@ class CareNetworkModel(Model):
             m.coordination_boost = max(0.0, m.coordination_boost - 0.1)
 
     # ----------------------------------------------------------
+    # Eudaimonia Dynamics [追加実装]
+    # ----------------------------------------------------------
+
+    def _update_eudaimonia(self, day: int) -> None:
+        """
+        エウダイモニア（持続的幸福）の自然減衰と、バーンアウト時のペナルティを計算。
+        やりがい搾取による精神的崩壊のダイナミクスを定式化する。
+        """
+        for w in self.workers:
+            # 継続的な徳の実践がない場合、エウダイモニアは緩やかに自然減衰する
+            w.eudaimonia = max(0.0, w.eudaimonia - 0.002)
+            
+            # バーンアウト状態（疲労限界0.90を突破）に陥った場合、
+            # 肉体的な限界が精神的な充足を上回り、幸福度が急落する（やりがい搾取の末路）
+            if w.fatigue >= 0.90:
+                w.eudaimonia = max(0.0, w.eudaimonia - 0.05)
+
+    # ----------------------------------------------------------
     # Metrics
     # ----------------------------------------------------------
 
     def _collect_metrics(self, day: int) -> None:
         from src.metrics import compute_daily_metrics
         row = compute_daily_metrics(self, day)
+
+        if self.workers:
+            row["mean_virtue"] = float(np.mean([w.virtue for w in self.workers]))
+            row["mean_eudaimonia"] = float(np.mean([w.eudaimonia for w in self.workers]))
+        else:
+            row["mean_virtue"] = 0.0
+            row["mean_eudaimonia"] = 0.0
+            
         self.daily_log.append(row)
 
     # ----------------------------------------------------------
