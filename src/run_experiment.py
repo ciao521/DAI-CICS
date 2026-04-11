@@ -88,6 +88,7 @@ def summarise(df: pd.DataFrame) -> pd.DataFrame:
         "mean_sdh_risk", "mean_isolation", "mean_acute_dependence",
         "mean_fatigue", "gini_fatigue", "burnout_count",
         "cum_acute_events",
+        "mean_virtue", "mean_eudaimonia",
         "cum_M1", "cum_M2", "cum_M3", "cum_M4", "cum_M5",
         "cum_FC_A1", "cum_FC_A2", "cum_FC_A3",
         "cum_FC_B1", "cum_FC_B2", "cum_FC_B3", "cum_FC_B4",
