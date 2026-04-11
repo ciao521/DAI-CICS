@@ -16,7 +16,7 @@
 
 Modern society faces a "polycrisis" driven by climate change-induced disasters and a rapidly aging population, with the number of people requiring nursing care projected to reach 9 million in Japan by 2050. Conventional socioeconomic mechanisms—namely, the "Market Mechanism" (exchange) and the "Power Mechanism" (redistribution)—are proving insufficient, often leading to systemic failures and the exploitation of care workers' dedication in local communities.
 
-**DAI-CICS** explores the dynamics of the **"Community Mechanism"** (spontaneous mutual aid). By employing an LLM-based multi-agent simulation (leveraging the AgentDynEx framework), this project quantitatively demonstrates how AI-driven minimal interventions ("nudges") can prevent the collapse of care networks, mitigate burnout, and guide the system toward sustainable *Care Resilience*.
+**DAI-CICS** explores the dynamics of the **"Community Mechanism"** (spontaneous mutual aid). By employing an LLM-based multi-agent simulation , this project quantitatively demonstrates how AI-driven minimal interventions ("nudges") can prevent the collapse of care networks, mitigate burnout, and guide the system toward sustainable *Care Resilience*.
 
 ## ✨ Key Features
 
