@@ -11,10 +11,10 @@ from typing import Any
 # 1. Population
 # ──────────────────────────────────────────────────────────────
 N_ELDERS: int = 40
-N_PROVIDERS: int = 20
+N_PROVIDERS: int = 10
 N_FAMILIES: int = 10
 N_LINK_WORKERS: int = 5
-N_MANAGERS: int = 3
+N_MANAGERS: int = 2
 N_AI_WATCHERS: int = 1   # always 1; scenario controls behaviour
 
 # ──────────────────────────────────────────────────────────────
